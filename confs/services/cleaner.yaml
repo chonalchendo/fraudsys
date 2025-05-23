@@ -2,12 +2,13 @@ service:
   KIND: cleaner
   input_topic: raw_transactions
   output_topic: processed_transactions
-  servers: [broker:29092]  # localhost:9092 - local debugging, broker:29092 - Docker
+  servers: [localhost:9092, broker:29092]  # localhost:9092 - local debugging, broker:29092 - Docker
   group_id: cleaner
   rename_columns: {
     "trans_date_trans_time": "transaction_time",
     "merchant": "merchant_name",
     "amt": "amount_usd",
+    "trans_num": "transaction_id"
     }
   categorical_columns: ["category"]
   drop_columns: ["first", "last", "cc_num", "dob"]
