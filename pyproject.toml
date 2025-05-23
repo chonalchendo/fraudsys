@@ -8,7 +8,9 @@ authors = [
 ]
 requires-python = ">=3.13.0"
 dependencies = [
+    "fastapi[standard]>=0.115.12",
     "hatchling>=1.27.0",
+    "httpx>=0.28.1",
     "kafka-python-ng>=2.2.3",
     "kaggle>=1.7.4.5",
     "loguru>=0.7.3",
@@ -18,6 +20,7 @@ dependencies = [
     "pydantic-settings>=2.9.1",
     "rich>=14.0.0",
     "setuptools>=80.7.1",
+    "uvicorn>=0.34.2",
 ]
 
 [project.scripts]
