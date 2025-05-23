@@ -1,0 +1,16 @@
+job:
+  KIND: extract
+  sensitive_columns: ["first", "last", "cc_num", "dob"]
+  input:
+    KIND: kaggle
+    path: ""  # No input path needed
+    dataset_path: kartik2112/fraud-detection
+    output_directory: data/raw
+    unzip: True
+  output_training_df:
+    KIND: parquet
+    path: data/training/training.parquet
+  output_production_df:
+    KIND: parquet
+    path: data/prod/prod.parquet
+
