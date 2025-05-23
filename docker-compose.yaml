@@ -42,6 +42,19 @@ services:
     ports:
       - "6379:6379"
 
+  feature-api:
+    container_name: feature-api
+    restart: always
+    build:
+      context: .
+      dockerfile: .docker/api.Dockerfile
+    depends_on:
+      - broker
+      - redis
+    environment:
+      - KAGGLE_KEY=${KAGGLE_KEY}
+      - KAGGLE_USERNAME=${KAGGLE_USERNAME}
+
   feature-producer:
     container_name: feature-producer
     restart: always
@@ -51,11 +64,13 @@ services:
     depends_on:
       - broker
       - redis
+      - feature-api
     environment:
       - KAGGLE_KEY=${KAGGLE_KEY}
       - KAGGLE_USERNAME=${KAGGLE_USERNAME}
     volumes:
       - ./data/prod:/app/data/prod:ro  # :ro for read-only
+  
 
   feature-cleaner:
     container_name: feature-cleaner
@@ -71,16 +86,3 @@ services:
       - KAGGLE_KEY=${KAGGLE_KEY}
       - KAGGLE_USERNAME=${KAGGLE_USERNAME}
 
-  feature-api:
-    container_name: feature-api
-    restart: always
-    build:
-      context: .
-      dockerfile: .docker/api.Dockerfile
-    depends_on:
-      - broker
-      - redis
-      - feature-producer
-    environment:
-      - KAGGLE_KEY=${KAGGLE_KEY}
-      - KAGGLE_USERNAME=${KAGGLE_USERNAME}
