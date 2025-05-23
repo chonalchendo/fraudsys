@@ -31,7 +31,7 @@ services:
       - 8080:8080
     depends_on:
       - zookeeper
-      - broker 
+      - broker
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:29092
@@ -55,7 +55,7 @@ services:
       - KAGGLE_KEY=${KAGGLE_KEY}
       - KAGGLE_USERNAME=${KAGGLE_USERNAME}
     volumes:
-      - ./data/prod:/app/data/prod:ro  # :ro for read-only  
+      - ./data/prod:/app/data/prod:ro  # :ro for read-only
 
   feature-cleaner:
     container_name: feature-cleaner
