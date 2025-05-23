@@ -1,0 +1,8 @@
+service:
+  KIND: api
+  execute: fraudsys.services.api.app:app 
+  host: 0.0.0.0
+  port: 8000
+  reload: False
+  kafka_servers: [localhost:9092, broker:29092] # localhost:9092 - local debugging, broker:29092 - Docker
+  input_topic: raw_transactions
