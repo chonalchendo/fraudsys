@@ -1,0 +1,87 @@
+[project]
+name = "fraudsys"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "chonalchendo", email = "110059232+chonalchendo@users.noreply.github.com" }
+]
+requires-python = ">=3.13.0"
+dependencies = [
+    "hatchling>=1.27.0",
+    "kafka-python-ng>=2.2.3",
+    "kaggle>=1.7.4.5",
+    "loguru>=0.7.3",
+    "omegaconf>=2.3.0",
+    "polars>=1.29.0",
+    "pydantic>=2.11.4",
+    "pydantic-settings>=2.9.1",
+    "rich>=14.0.0",
+    "setuptools>=80.7.1",
+]
+
+[project.scripts]
+fraudsys = "fraudsys.cli:execute"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+checks = [
+    "bandit>=1.8.3",
+    "mypy>=1.15.0",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
+    "ruff>=0.11.10",
+]
+commit = [
+    "commitizen>=4.7.2",
+    "pre-commit>=4.2.0",
+]
+dev = [
+    "rust-just>=1.40.0",
+]
+doc = [
+    "pdoc>=15.0.3",
+]
+
+# TOOLS
+
+[tool.uv]
+default-groups = ["checks", "commit", "dev", "doc"]
+
+[tool.bandit]
+targets = ["src"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_schema = "pep440"
+version_provider = "pep621"
+changelog_start_rev = "v0.1.0"
+update_changelog_on_bump = true
+
+[tool.mypy]
+pretty = true
+python_version = "3.13"
+check_untyped_defs = true
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+addopts = "--verbosity=2"
+pythonpath = ["src"]
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+fix = true
+indent-width = 4
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
