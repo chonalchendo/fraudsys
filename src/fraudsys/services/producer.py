@@ -1,10 +1,8 @@
-import json
 import typing as T
-from time import sleep
+import time
 
 import pydantic as pdt
-from kafka import KafkaAdminClient, KafkaProducer
-from kafka.admin import NewTopic
+import httpx
 
 from fraudsys import logging as logger_
 from fraudsys.io import datasets
@@ -14,8 +12,8 @@ from fraudsys.services import base
 class ProducerService(base.Service):
     KIND: T.Literal["producer"] = "producer"
 
-    topic: str
-    servers: list[str]
+    health_check_endpoint: str
+    endpoint: str
 
     input: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
 
@@ -26,48 +24,29 @@ class ProducerService(base.Service):
         self.logger.start()
         logger = self.logger.logger()
 
-        producer, admin = self._initialise()
-        self._create_topic(admin)
-
         data = self.input.load()
 
+        self._wait_for_api()
+
         for record in data.to_dicts():
-            producer.send(self.topic, json.dumps(record).encode())
-            logger.debug("MESSAGE: {}", record)
-            sleep(1)
+            response = httpx.post(self.endpoint, json=record)
+            logger.debug("POSTED: {}", record)
+            logger.debug("RESPONSE: {}", response)
+            time.sleep(1)
 
-    @T.override
-    def stop(self) -> None:
+    def _wait_for_api(self, retries: int = 30, delay: int = 2) -> None:
         logger = self.logger.logger()
-        try:
-            admin = KafkaAdminClient(bootstrap_servers=self.servers)
-            logger.info(admin.delete_topics([self.topic]))
-            logger.info(f"Topic {self.topic} deleted")
-        except Exception as e:
-            logger.exception(str(e))
-            pass
-
-    def _initialise(self) -> tuple[KafkaProducer, KafkaAdminClient]:
-        logger = self.logger.logger()
-        for i in range(20):
+        for attempt in range(retries):
             try:
-                producer = KafkaProducer(bootstrap_servers=self.servers)
-                admin = KafkaAdminClient(bootstrap_servers=self.servers)
-                logger.success("SUCCESS: instantiated Kafka admin and producer")
-                return producer, admin
-            except Exception as e:
-                logger.exception(
-                    f"Trying to instantiate admin and producer with bootstrap servers {self.servers} with error {e}"
-                )
-                sleep(10)
-                pass
-
-    def _create_topic(self, admin: KafkaAdminClient):
-        logger = self.logger.logger()
-        try:
-            topic = NewTopic(name=self.topic, num_partitions=3, replication_factor=1)
-            admin.create_topics([topic])
-            logger.info(f"Topic {self.topic} created")
-        except Exception as e:
-            logger.exception(str(e))
-            pass
+                response = httpx.get(self.health_check_endpoint)
+                if response.status_code == 200:
+                    logger.success(f"API is ready after {attempt + 1} tries.")
+                    return
+                else:
+                    logger.error(
+                        f"API healthcheck returned {response.status_code}, retrying..."
+                    )
+            except httpx.ConnectError:
+                print("API not reachable, retrying...")
+            time.sleep(delay)
+        raise RuntimeError("API not ready after maximum retries.")

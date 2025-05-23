@@ -1,7 +1,7 @@
 service:
   KIND: producer
-  topic: raw_transactions
-  servers: [broker:29092]  # localhost:9092 - local debugging, broker:29092 - Docker
+  health_check_endpoint: http://feature-api:8000/health
+  endpoint: http://feature-api:8000/transaction  # localhost -> http://localhost:8000/transaction, Docker -> http://feature-api:8000/transaction
   input:
     KIND: parquet
     path: "data/prod/prod.parquet"  # simulate real data coming in
