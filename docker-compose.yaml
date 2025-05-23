@@ -70,3 +70,17 @@ services:
     environment:
       - KAGGLE_KEY=${KAGGLE_KEY}
       - KAGGLE_USERNAME=${KAGGLE_USERNAME}
+
+  feature-api:
+    container_name: feature-api
+    restart: always
+    build:
+      context: .
+      dockerfile: .docker/api.Dockerfile
+    depends_on:
+      - broker
+      - redis
+      - feature-producer
+    environment:
+      - KAGGLE_KEY=${KAGGLE_KEY}
+      - KAGGLE_USERNAME=${KAGGLE_USERNAME}
