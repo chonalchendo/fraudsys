@@ -12,3 +12,8 @@ check-format:
 [group('check')]
 check-type:
   uv run mypy {{SOURCES}} {{TESTS}}
+
+# check code security
+[group('check')]
+check-security:
+    uv run bandit --recursive --configfile=pyproject.toml {{SOURCES}}
