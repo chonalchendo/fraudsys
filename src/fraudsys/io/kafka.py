@@ -34,7 +34,7 @@ class KafkaConsumerWrapper(pdt.BaseModel):
 
     logger: logging.Logger = logging.Logger()
 
-    def __iter__(self):
+    def __iter__(self) -> kafka.KafkaConsumer:
         self._consumer = self._create_consumer()
         return self._consumer
 
