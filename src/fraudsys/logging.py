@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import sys
-import typing as T
 
 import loguru
 import pydantic as pdt

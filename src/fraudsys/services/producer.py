@@ -27,9 +27,9 @@ class ProducerService(base.Service):
         logger = self.logger.logger()
 
         data = self.input.load()
-        
+
         if not isinstance(data, pl.DataFrame):
-            raise ValueError('Data must be a polars DataFrame')
+            raise ValueError("Data must be a polars DataFrame")
 
         self._wait_for_api()
 

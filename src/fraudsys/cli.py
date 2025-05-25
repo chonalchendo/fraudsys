@@ -35,7 +35,7 @@ def execute(argv: list[str] | None = None) -> int:
         raise RuntimeError("Config is not a dictionary")
 
     object_ = configs.to_object(config)
-    
+
     if not isinstance(object_, dict):
         raise RuntimeError("Expected object_ to be a dict")
 
@@ -52,5 +52,5 @@ def execute(argv: list[str] | None = None) -> int:
         service_setting.service.start()
         service_setting.service.stop()
         return 0
-    
+
     raise RuntimeError(f"Unsupported config type: {conf_type}")

@@ -15,7 +15,7 @@ def inject_context(ctx: models.AppContext):
 
 def get_context() -> models.AppContext:
     if not _context:
-        raise ValueError('_context is None')
+        raise ValueError("_context is None")
     return _context
 
 

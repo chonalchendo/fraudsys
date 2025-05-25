@@ -24,7 +24,7 @@ class ExtractJob(base.DataJob):
         # load data from kaggle
         logger.info("Loading data from Kaggle...")
         data = self.input.load()
-        
+
         if isinstance(data, pl.DataFrame):
             raise RuntimeError("Expected two datasets (train/test), got one.")
 
