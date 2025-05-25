@@ -8,7 +8,7 @@ import pydantic as pdt
 
 # %% - LOADERS
 
-type LoadType = pl.DataFrame | list[pl.DataFrame]
+type LoadType = pl.DataFrame | tuple[pl.DataFrame, ...]
 type WriteType = pl.DataFrame
 
 
@@ -28,7 +28,7 @@ class Loader(abc.ABC, pdt.BaseModel, strict=True, frozen=False, extra="forbid"):
         """Load the data from the path.
 
         Returns:
-            list[dict[str, T.Any]]: The loaded data.
+            LoadType: The loaded data.
         """
         pass
 
@@ -37,7 +37,7 @@ class JsonLoader(Loader):
     KIND: T.Literal["json"] = "json"
 
     @T.override
-    def load(self) -> pl.DataFrame:
+    def load(self) -> LoadType:
         if not Path(self.path).exists():
             raise FileNotFoundError(f"File not found: {self.path}")
         return pl.read_ndjson(self.path)
@@ -90,7 +90,7 @@ class KaggleLoader(Loader):
 
             datasets.append(data)
 
-        return datasets
+        return tuple(datasets)
 
 
 LoaderKind = JsonLoader | ParquetLoader | KaggleLoader
