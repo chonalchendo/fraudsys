@@ -7,7 +7,6 @@ import types as TS
 import typing as T
 
 import pydantic as pdt
-from rich import print
 
 from fraudsys import logging
 
