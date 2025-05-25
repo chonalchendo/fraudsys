@@ -35,17 +35,22 @@ def execute(argv: list[str] | None = None) -> int:
         raise RuntimeError("Config is not a dictionary")
 
     object_ = configs.to_object(config)
+    
+    if not isinstance(object_, dict):
+        raise RuntimeError("Expected object_ to be a dict")
 
-    conf_type = list(dict(object_).keys())
+    conf_type = list(object_.keys())
 
     if conf_type == ["job"]:
-        setting = settings.JobSettings.model_validate(object_)
-        with setting.job as job:
+        job_setting = settings.JobSettings.model_validate(object_)
+        with job_setting.job as job:
             job.run()
             return 0
 
     if conf_type == ["service"]:
-        setting = settings.ServiceSettings.model_validate(object_)
-        setting.service.start()
-        setting.service.stop()
+        service_setting = settings.ServiceSettings.model_validate(object_)
+        service_setting.service.start()
+        service_setting.service.stop()
         return 0
+    
+    raise RuntimeError(f"Unsupported config type: {conf_type}")
