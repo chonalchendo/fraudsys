@@ -31,10 +31,13 @@ class CleanerService(base.Service):
 
         self.kafka_producer.get_producer.flush()
 
-    def _process_message(self, message: dict) -> pl.DataFrame:
+    def _process_message(self, message: dict) -> dict[str, T.Any]:
         data = pl.from_records([message])
         transformed_data = self._clean(data)
-        return transformed_data.to_dicts()
+        dicts = transformed_data.to_dicts()
+        if len(dicts) != 1:
+            raise ValueError(f"Expected 1 row, got {len(dicts)}")
+        return dicts[0]
 
     def _clean(self, data: pl.DataFrame) -> pl.DataFrame:
         df = data.__copy__()
