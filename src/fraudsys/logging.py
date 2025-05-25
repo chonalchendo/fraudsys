@@ -39,7 +39,6 @@ class Logger(pdt.BaseModel, strict=True, frozen=True, extra="forbid"):
     diagnose: bool = False
     catch: bool = True
 
-    @T.override
     def start(self) -> None:
         loguru.logger.remove()
         config = self.model_dump()
