@@ -1,8 +1,8 @@
-import typing as T
 import time
+import typing as T
 
-import pydantic as pdt
 import httpx
+import pydantic as pdt
 
 from fraudsys import logging as logger_
 from fraudsys.io import datasets
