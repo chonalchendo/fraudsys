@@ -2,7 +2,8 @@ from functools import lru_cache
 
 from fastapi import Depends, FastAPI
 
-from fraudsys.services.api import kafka, models
+from fraudsys.io import kafka
+from fraudsys.services.api import models
 
 _context: models.AppContext = None
 
