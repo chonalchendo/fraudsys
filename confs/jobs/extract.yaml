@@ -17,4 +17,3 @@ job:
   output_production_labels_df:
     KIND: parquet
     path: data/prod/labels.parquet
-
