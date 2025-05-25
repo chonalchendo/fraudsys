@@ -23,7 +23,15 @@ class ExtractJob(base.DataJob):
 
         # load data from kaggle
         logger.info("Loading data from Kaggle...")
-        train, test = self.input.load()
+        data = self.input.load()
+        
+        if isinstance(data, pl.DataFrame):
+            raise RuntimeError("Expected two datasets (train/test), got one.")
+
+        if len(data) != 2:
+            raise RuntimeError(f"Expected two datasets. Got {len(data)}")
+
+        train, test = data
 
         # merge train and test dataset
         logger.info("Merging train and test datasets...")
