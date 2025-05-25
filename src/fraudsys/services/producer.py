@@ -8,6 +8,8 @@ from fraudsys import logging as logger_
 from fraudsys.io import datasets
 from fraudsys.services import base
 
+import polars as pl
+
 
 class ProducerService(base.Service):
     KIND: T.Literal["producer"] = "producer"
@@ -25,6 +27,9 @@ class ProducerService(base.Service):
         logger = self.logger.logger()
 
         data = self.input.load()
+        
+        if not isinstance(data, pl.DataFrame):
+            raise ValueError('Data must be a polars DataFrame')
 
         self._wait_for_api()
 
