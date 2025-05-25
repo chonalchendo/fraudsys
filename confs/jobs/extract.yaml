@@ -1,6 +1,7 @@
 job:
   KIND: extract
   sensitive_columns: ["first", "last", "cc_num", "dob"]
+  target_column: is_fraud
   input:
     KIND: kaggle
     path: ""  # No input path needed
@@ -13,4 +14,7 @@ job:
   output_production_df:
     KIND: parquet
     path: data/prod/prod.parquet
+  output_production_labels_df:
+    KIND: parquet
+    path: data/prod/labels.parquet
 
