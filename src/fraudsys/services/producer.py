@@ -10,7 +10,7 @@ from fraudsys.services import base
 
 if T.TYPE_CHECKING:
     import polars as pl
-    
+
 
 class ProducerService(base.Service):
     KIND: T.Literal["producer"] = "producer"
