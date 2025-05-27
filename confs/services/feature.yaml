@@ -1,11 +1,11 @@
 service:
-  KIND: cleaner
+  KIND: feature
   kafka_consumer:
     topic: raw_transactions
     servers:
       - localhost:9092
       - broker:29092
-    group_id: cleaner
+    group_id: feature
   kafka_producer:
     topic: processed_transactions
     servers:

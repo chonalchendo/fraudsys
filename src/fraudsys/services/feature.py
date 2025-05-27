@@ -7,8 +7,8 @@ from fraudsys.io import kafka
 from fraudsys.services import base
 
 
-class CleanerService(base.Service):
-    KIND: T.Literal["cleaner"] = "cleaner"
+class FeatureService(base.Service):
+    KIND: T.Literal["feature"] = "feature"
 
     kafka_producer: kafka.KafkaProducerWrapper
     kafka_consumer: kafka.KafkaConsumerWrapper

@@ -11,4 +11,4 @@ RUN uv pip install --system *.whl && \
 
 # Set up the entry point to use uv run
 ENTRYPOINT ["uv", "run"]
-CMD ["fraudsys", "confs/cleaner.yaml"]
+CMD ["fraudsys", "confs/feature.yaml"]
