@@ -77,7 +77,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: .docker/cleaner.Dockerfile
+      dockerfile: .docker/feature.Dockerfile
     depends_on:
       - broker
       - redis
@@ -85,3 +85,19 @@ services:
     environment:
       - KAGGLE_KEY=${KAGGLE_KEY}
       - KAGGLE_USERNAME=${KAGGLE_USERNAME}
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.20.3
+    ports:
+      - 5001:5000
+    volumes:
+      - ./mlruns:/mlflow/mlruns  # persist experiment data
+      - ./mlflow.db:/mlflow/mlflow.db
+    environment:
+      - MLFLOW_TRACKING_URI=http://localhost:5001
+    command: >
+      mlflow server
+        --backend-store-uri sqlite:///mlflow.db
+        --default-artifact-root /mlflow/mlruns
+        --host 0.0.0.0
+        --port 5000
