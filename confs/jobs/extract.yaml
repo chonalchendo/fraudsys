@@ -1,19 +1,20 @@
 job:
   KIND: extract
-  sensitive_columns: ["first", "last", "cc_num", "dob"]
-  target_column: is_fraud
   input:
     KIND: kaggle
     path: ""  # No input path needed
     dataset_path: kartik2112/fraud-detection
     output_directory: data/raw
     unzip: True
-  output_training_df:
+  output_inputs_train:  # training X data
     KIND: parquet
-    path: data/training/training.parquet
-  output_production_df:
+    path: data/training/raw_inputs_train.parquet
+  output_targets_train:  # training y data
     KIND: parquet
-    path: data/prod/prod.parquet
-  output_production_labels_df:
+    path: data/training/targets_train.parquet
+  output_inputs_production:  # production X data
     KIND: parquet
-    path: data/prod/labels.parquet
+    path: data/prod/inputs_prod.parquet
+  output_targets_production:  # production y data
+    KIND: parquet
+    path: data/prod/targets_prod.parquet
