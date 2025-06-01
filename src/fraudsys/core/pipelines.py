@@ -1,6 +1,6 @@
 import typing as T
 
-from imblearn import over_sampling, pipeline, under_sampling
+from imblearn import over_sampling, pipeline
 from sklearn import compose, preprocessing
 
 if T.TYPE_CHECKING:

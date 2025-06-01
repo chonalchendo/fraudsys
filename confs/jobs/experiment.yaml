@@ -5,7 +5,7 @@ job:
     path: data/training/inputs_train.parquet
   targets:
     KIND: parquet
-    path: data/training/targets_train.parquet 
+    path: data/training/targets_train.parquet
   searcher:
     KIND: cross_validation
   splitter:
