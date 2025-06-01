@@ -1,7 +1,7 @@
 from .api.main import APIService
-from .cleaner import CleanerService
+from .feature import FeatureService
 from .producer import ProducerService
 
-ServiceKind = CleanerService | ProducerService | APIService
+ServiceKind = FeatureService | ProducerService | APIService
 
-__all__ = ["CleanerService", "ProducerService", "APIService"]
+__all__ = ["FeatureService", "ProducerService", "APIService"]
