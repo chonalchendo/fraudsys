@@ -2,6 +2,7 @@ import argparse
 
 import omegaconf as oc
 from dotenv import load_dotenv
+from rich import print
 
 from fraudsys import settings
 from fraudsys.io import configs
@@ -43,6 +44,7 @@ def execute(argv: list[str] | None = None) -> int:
 
     if conf_type == ["job"]:
         job_setting = settings.JobSettings.model_validate(object_)
+        print(job_setting)
         with job_setting.job as job:
             job.run()
             return 0
