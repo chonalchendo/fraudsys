@@ -2,14 +2,11 @@ import time
 import typing as T
 
 import httpx
+import polars as pl
 import pydantic as pdt
 
-from fraudsys import logging as logger_
-from fraudsys.io import datasets
+from fraudsys.io import datasets, runtimes
 from fraudsys.services import base
-
-if T.TYPE_CHECKING:
-    import polars as pl
 
 
 class ProducerService(base.Service):
@@ -20,7 +17,7 @@ class ProducerService(base.Service):
 
     input: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
 
-    logger: logger_.Logger = logger_.Logger()
+    logger: runtimes.Logger = runtimes.Logger()
 
     @T.override
     def start(self) -> None:

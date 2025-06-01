@@ -4,5 +4,5 @@ service:
   endpoint: http://feature-api:8000/transaction  # localhost -> http://localhost:8000/transaction, Docker -> http://feature-api:8000/transaction
   input:
     KIND: parquet
-    path: "data/prod/prod.parquet"  # simulate real data coming in
+    path: "data/prod/inputs_prod.parquet"  # simulate real data coming in
     storage_options: null  # can set if reading from AWS
