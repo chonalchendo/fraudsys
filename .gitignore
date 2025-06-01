@@ -20,3 +20,9 @@ data/
 
 # env file
 .env
+
+# mypy
+.mypy_cache
+
+# mlflow
+mlruns
