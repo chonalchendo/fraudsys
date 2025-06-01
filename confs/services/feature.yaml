@@ -11,16 +11,3 @@ service:
     servers:
       - localhost:9092
       - broker:29092
-  rename_columns: {
-    "trans_date_trans_time": "transaction_time",
-    "merchant": "merchant_name",
-    "amt": "amount_usd",
-    "trans_num": "transaction_id"
-    }
-  categorical_columns:
-    - "category"
-  drop_columns:
-    - "first"
-    - "last"
-    - "cc_num"
-    - "dob"

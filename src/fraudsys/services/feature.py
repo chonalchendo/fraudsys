@@ -2,8 +2,8 @@ import typing as T
 
 import polars as pl
 
-from fraudsys import logging as logger_
-from fraudsys.io import kafka
+from fraudsys.core import features
+from fraudsys.io import kafka, runtimes
 from fraudsys.services import base
 
 
@@ -13,11 +13,7 @@ class FeatureService(base.Service):
     kafka_producer: kafka.KafkaProducerWrapper
     kafka_consumer: kafka.KafkaConsumerWrapper
 
-    rename_columns: dict[str, T.Any]
-    drop_columns: list[str]
-    categorical_columns: list[str]
-
-    logger: logger_.Logger = logger_.Logger()
+    logger: runtimes.Logger = runtimes.Logger()
 
     @T.override
     def start(self) -> None:
@@ -33,20 +29,8 @@ class FeatureService(base.Service):
 
     def _process_message(self, message: dict) -> dict[str, T.Any]:
         data = pl.from_records([message])
-        transformed_data = self._clean(data)
+        transformed_data = features.clean(data)
         dicts = transformed_data.to_dicts()
         if len(dicts) != 1:
             raise ValueError(f"Expected 1 row, got {len(dicts)}")
         return dicts[0]
-
-    def _clean(self, data: pl.DataFrame) -> pl.DataFrame:
-        df = data.__copy__()
-        df = df.rename(self.rename_columns).drop(self.drop_columns)
-        data = df.with_columns(*self._convert_to_category())
-        return data
-
-    def _convert_to_category(self) -> T.Generator[pl.Expr, T.Any, None]:
-        columns = self.categorical_columns
-
-        for column in columns:
-            yield pl.col(column).cast(pl.Categorical)
