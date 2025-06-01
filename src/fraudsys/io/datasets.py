@@ -3,6 +3,7 @@ import typing as T
 from pathlib import Path
 
 import kaggle
+import mlflow.data.pandas_dataset as lineage
 import polars as pl
 import pydantic as pdt
 
@@ -10,6 +11,7 @@ import pydantic as pdt
 
 type LoadType = pl.DataFrame | tuple[pl.DataFrame, ...]
 type WriteType = pl.DataFrame
+Lineage: T.TypeAlias = lineage.PandasDataset
 
 
 class Loader(abc.ABC, pdt.BaseModel, strict=True, frozen=False, extra="forbid"):
@@ -32,6 +34,25 @@ class Loader(abc.ABC, pdt.BaseModel, strict=True, frozen=False, extra="forbid"):
         """
         pass
 
+    def lineage(
+        self,
+        name: str,
+        data: pl.DataFrame,
+        targets: str | None = None,
+        predictions: str | None = None,
+    ) -> Lineage:
+        """Generate lineage information.
+
+        Args:
+            name (str): dataset name.
+            data (pd.DataFrame): reader dataframe.
+            targets (str | None): name of the target column.
+            predictions (str | None): name of the prediction column.
+
+        Returns:
+            Lineage: lineage information.
+        """
+
 
 class JsonLoader(Loader):
     KIND: T.Literal["json"] = "json"
@@ -52,7 +73,27 @@ class ParquetLoader(Loader):
     def load(self) -> LoadType:
         if not Path(self.path).exists():
             raise FileNotFoundError(f"File not found: {self.path}")
-        return pl.read_parquet(self.path, storage_options=self.storage_options)
+        df = pl.read_parquet(self.path, storage_options=self.storage_options)
+        # rename index column
+        df = df.rename({df.columns[0]: "instant"})
+        return df
+
+    @T.override
+    def lineage(
+        self,
+        name: str,
+        data: pl.DataFrame,
+        targets: str | None = None,
+        predictions: str | None = None,
+    ) -> Lineage:
+        pandas_data = data.to_pandas()
+        return lineage.from_pandas(
+            df=pandas_data,
+            name=name,
+            source=self.path,
+            targets=targets,
+            predictions=predictions,
+        )
 
 
 class KaggleLoader(Loader):
