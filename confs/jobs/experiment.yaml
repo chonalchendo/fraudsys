@@ -1,0 +1,16 @@
+job:
+  KIND: experiment
+  inputs:
+    KIND: parquet
+    path: data/training/inputs_train.parquet
+  targets:
+    KIND: parquet
+    path: data/training/targets_train.parquet 
+  searcher:
+    KIND: cross_validation
+  splitter:
+    KIND: time_series
+  model_selection:
+    - KIND: logistic_regression
+    - KIND: random_forest
+    - KIND: xgboost
