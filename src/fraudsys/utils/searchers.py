@@ -15,7 +15,9 @@ from fraudsys.utils import splitters
 # %% TYPES
 
 # Grid of model params
-Grid = dict[models.ParamKey, list[models.ParamValue]]
+Grid = dict[models.ParamKey, T.Sequence[models.ParamValue]]
+# Distribution of model params
+Dist = dict[models.ParamKey, T.Sequence[models.ParamValue]]
 
 # Results of a model search
 Results = tuple[
@@ -87,4 +89,44 @@ class CVSearcher(Searcher):
         return results, avg_score, params
 
 
-SearcherKind = CVSearcher
+class RandomCVSearcher(Searcher):
+    KIND: T.Literal["random_cv"] = "random_cv"
+
+    param_dist: Dist
+
+    n_iter: int = pdt.Field(default=10)
+    n_jobs: int | None = pdt.Field(default=None)
+    refit: bool = pdt.Field(default=True)
+    verbose: int = pdt.Field(default=3)
+    error_score: str | float = pdt.Field(default="raise")
+    return_train_score: bool = pdt.Field(default=False)
+    random_state: int | None = pdt.Field(default=42)
+
+    @T.override
+    def search(
+        self,
+        model: models.Model,
+        metric: metrics.Metric,
+        inputs: schemas.Inputs,
+        targets: schemas.Targets,
+        cv: CrossValidation,
+    ) -> Results:
+        searcher = model_selection.RandomizedSearchCV(
+            estimator=model,
+            n_iter=self.n_iter,
+            scoring=metric.scorer,
+            cv=cv,
+            param_distributions=self.param_dist,
+            n_jobs=self.n_jobs,
+            refit=self.refit,
+            verbose=self.verbose,
+            error_score=self.error_score,
+            return_train_score=self.return_train_score,
+            random_state=self.random_state,
+        )
+        searcher.fit(inputs, targets)
+        results = pl.DataFrame(searcher.cv_results_, strict=False)
+        return results, searcher.best_score_, searcher.best_params_
+
+
+SearcherKind = CVSearcher | RandomCVSearcher
