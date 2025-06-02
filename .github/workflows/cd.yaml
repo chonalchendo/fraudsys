@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        image: [api, cleaner, producer]
+        image: [api, feature, producer]
 
     steps:
       - uses: actions/checkout@v4
