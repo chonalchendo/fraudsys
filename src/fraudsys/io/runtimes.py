@@ -45,9 +45,9 @@ class Logger(Runtime):
     sink: str = "stderr"
     level: str = "DEBUG"
     format: str = (
-        "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-        "<level>{level: <8}</level> | "
-        "<cyan>{name}</cyan>:<magenta>{function}</magenta>:<yellow>{line}</yellow> | "
+        "<green>[{time:YYYY-MM-DD HH:mm:ss.SSS}]</green> | "
+        "<level>[{level}]</level> | "
+        "<cyan>[{name}</cyan>:<magenta>{function}</magenta>:<yellow>{line}]</yellow> | "
         "<level>{message}</level>"
     )
     serialize: bool = False
