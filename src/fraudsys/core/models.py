@@ -177,9 +177,37 @@ class RandomForestModel(Model):
 class XGBoostModel(Model):
     KIND: T.Literal["xgboost"] = "xgboost"
 
+    # default xgboost params
+    n_estimators: int = 100
+    max_depth: int = 6
+    learning_rate: float = 0.3
+    subsample: float = 1.0
+    colsample_bytree: float = 1.0
+    colsample_bylevel: float = 1.0
+    reg_alpha: float = 0.0
+    reg_lambda: float = 1.0
+    min_child_weight: int = 1
+    gamma: float = 0.0
+    scale_pos_weight: float = 1.0
+    max_delta_step: int = 0
+
     @T.override
     def fit(self, inputs: schemas.Inputs, targets: schemas.Targets) -> "XGBoostModel":
-        classifier = xgboost.XGBClassifier()
+        classifier = xgboost.XGBClassifier(
+            n_estimators=self.n_estimators,
+            max_depth=self.max_depth,
+            learning_rate=self.learning_rate,
+            subsample=self.subsample,
+            colsample_bytree=self.colsample_bytree,
+            colsample_bylevel=self.colsample_bylevel,
+            reg_alpha=self.reg_alpha,
+            reg_lambda=self.reg_lambda,
+            min_child_weight=self.min_child_weight,
+            gamma=self.gamma,
+            scale_pos_weight=self.scale_pos_weight,
+            max_delta_step=self.max_delta_step,
+            random_state=self.random_state,
+        )
         # pipeline
         self._pipeline = pipelines.create_pipeline(
             model=classifier,
