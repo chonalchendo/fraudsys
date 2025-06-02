@@ -117,3 +117,4 @@ class ExperimentJob(base.ModelJob):
                 client.log_param(
                     run_id=run.info.run_id, key=f"{model.KIND}_params", value=params
                 )
+        return locals()
