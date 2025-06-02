@@ -8,7 +8,6 @@ import typing as T
 
 import pydantic as pdt
 
-from fraudsys import logging
 from fraudsys.io import runtimes
 
 # %% TYPES
@@ -90,7 +89,7 @@ class ModelJob(Job):
         mlflow_service (services.MlflowService): manage the mlflow system.
     """
 
-    logger: logging.Logger = logging.Logger()
+    logger: runtimes.Logger = runtimes.Logger()
     # alerts_service: services.AlertsService = services.AlertsService()
     mlflow_runtime: runtimes.Mlflow = runtimes.Mlflow()
 

@@ -5,7 +5,7 @@ import typing as T
 import kafka
 import pydantic as pdt
 
-from fraudsys import logging
+from fraudsys.io import runtimes
 
 
 class KafkaProducerWrapper(pdt.BaseModel):
@@ -32,7 +32,7 @@ class KafkaConsumerWrapper(pdt.BaseModel):
     servers: list[str]
     group_id: str
 
-    logger: logging.Logger = logging.Logger()
+    logger: runtimes.Logger = runtimes.Logger()
 
     def __iter__(self) -> kafka.KafkaConsumer:
         self._consumer = self._create_consumer()
