@@ -117,14 +117,13 @@ class SklearnMetric(Metric):
 
     name: str = "f1_score"  # default for imbalanced classification
     greater_is_better: bool = True
-    use_proba: bool = False  # True if using metrics like roc_auc_score
 
     @T.override
     def score(self, targets: schemas.Targets, outputs: schemas.Outputs) -> float:
         metric_func = getattr(sklearn_metrics, self.name)
-        sign = 1 if self.greater_is_better else -1
+        sign = 1 if self.greater_is_better else -1  # normalise values to maximise
         y_true = targets[schemas.TargetsSchema.is_fraud]
-        y_pred = outputs[schemas.OutputsSchema.prediction]  # e.g., probabilities
+        y_pred = outputs[schemas.OutputsSchema.prediction]
         score = metric_func(y_true=y_true, y_pred=y_pred) * sign
         return float(score)
 
