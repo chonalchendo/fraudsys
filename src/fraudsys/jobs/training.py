@@ -1,9 +1,7 @@
 import typing as T
 
 import mlflow
-import numpy as np
 import pydantic as pdt
-from rich import print
 
 from fraudsys.core import metrics as metrics_
 from fraudsys.core import models, schemas
@@ -19,7 +17,7 @@ Questions:
 - Will I use cross-validation during training so evaluate which models are best?
     - Yes, cross-validation will be included and results logged in MlFlow to
     access which models are best.
-- Will the data be split based on datetime and into three splits (train, test, validation)? 
+- Will the data be split based on datetime and into three splits (train, test, validation)?
     - Yes, the data will be split into train, test, and validation. The validation set
     will be used to tune hyperparamters in the tune job.
 - Will a baseline model be selected with more advanced models being used to see how performance
@@ -27,7 +25,7 @@ improves.
     - Yes, a baseline classification model will be used with further models being used to see
     how performance improves but important to find trade off between complexity/simplicity,
     explainability, and inference speed.
-- 
+-
 """
 
 
