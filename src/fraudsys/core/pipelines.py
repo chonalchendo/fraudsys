@@ -1,6 +1,6 @@
 import typing as T
 
-from imblearn import over_sampling, pipeline
+from imblearn import pipeline
 from sklearn import compose, preprocessing
 
 if T.TYPE_CHECKING:
@@ -29,7 +29,7 @@ def create_pipeline(
     return pipeline.Pipeline(
         steps=[
             ("transformer", transformer),
-            ("smote", over_sampling.SMOTE(random_state=random_state)),
+            # ("smote", over_sampling.SMOTE(random_state=random_state)),
             ("model", model),
         ]
     )
