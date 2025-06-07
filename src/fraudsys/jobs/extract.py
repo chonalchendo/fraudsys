@@ -100,8 +100,6 @@ class ExtractJob(base.DataJob):
         )
 
     def _get_labels(self, prod_df: pl.DataFrame) -> tuple[pl.DataFrame, pl.DataFrame]:
-        is_fraud_df = prod_df.select(constants.TARGET_COLUMN).with_row_index(
-            name="instant"
-        )
+        is_fraud_df = prod_df.select(constants.TARGET_COLUMN)
         features_df = prod_df.drop(constants.TARGET_COLUMN)
         return features_df, is_fraud_df
