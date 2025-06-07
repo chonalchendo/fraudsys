@@ -4,10 +4,10 @@
 
 import typing as T
 
-import pandera.polars as pa
+import pandas as pd
+import pandera.pandas as pa
+import pandera.typing as papd
 import pandera.typing.common as padt
-import pandera.typing.polars as papl
-import polars as pl
 
 # %% TYPES
 
@@ -36,7 +36,7 @@ class Schema(pa.DataFrameModel):
         strict: bool = True
 
     @classmethod
-    def check(cls: T.Type[TSchema], data: pl.DataFrame) -> papl.DataFrame[TSchema]:
+    def check(cls: T.Type[TSchema], data: pd.DataFrame) -> papd.DataFrame[TSchema]:
         """Check the dataframe with this schema.
 
         Args:
@@ -45,48 +45,52 @@ class Schema(pa.DataFrameModel):
         Returns:
             papd.DataFrame[TSchema]: validated dataframe.
         """
-        return T.cast(papl.DataFrame[TSchema], cls.validate(data))
+        return T.cast(papd.DataFrame[TSchema], cls.validate(data))
 
 
 class InputsSchema(Schema):
-    instant: papl.Series[padt.UInt32] = pa.Field(ge=0)
-    customer_id: papl.Series[str] = pa.Field()
-    transaction_id: papl.Series[str] = pa.Field()
-    transaction_time: papl.Series[str] = pa.Field()
-    merchant_name: papl.Series[str] = pa.Field()
-    category: papl.Series[str] = pa.Field()
-    amount_usd: papl.Series[padt.Float32] = pa.Field()
-    gender: papl.Series[str] = pa.Field()
-    street: papl.Series[str] = pa.Field()
-    city: papl.Series[str] = pa.Field()
-    state: papl.Series[str] = pa.Field()
-    zip: papl.Series[padt.UInt64] = pa.Field()
-    lat: papl.Series[padt.Float32] = pa.Field()
-    long: papl.Series[padt.Float32] = pa.Field()
-    city_pop: papl.Series[padt.UInt32] = pa.Field()
-    job: papl.Series[str] = pa.Field()
-    dob: papl.Series[str] = pa.Field()
-    unix_time: papl.Series[padt.UInt32] = pa.Field()
-    merch_lat: papl.Series[padt.Float32] = pa.Field(ge=-90, le=90)
-    merch_long: papl.Series[padt.Float32] = pa.Field(ge=-180, le=180)
+    """Schema for the project inputs."""
+
+    instant: papd.Index[padt.UInt32] = pa.Field(ge=0)
+    customer_id: papd.Series[str] = pa.Field()
+    transaction_id: papd.Series[str] = pa.Field()
+    transaction_time: papd.Series[str] = pa.Field()
+    merchant_name: papd.Series[str] = pa.Field()
+    category: papd.Series[str] = pa.Field()
+    amount_usd: papd.Series[padt.Float32] = pa.Field()
+    gender: papd.Series[str] = pa.Field()
+    street: papd.Series[str] = pa.Field()
+    city: papd.Series[str] = pa.Field()
+    state: papd.Series[str] = pa.Field()
+    zip: papd.Series[padt.UInt32] = pa.Field()
+    lat: papd.Series[padt.Float32] = pa.Field()
+    long: papd.Series[padt.Float32] = pa.Field()
+    city_pop: papd.Series[padt.UInt32] = pa.Field()
+    job: papd.Series[str] = pa.Field()
+    dob: papd.Series[str] = pa.Field()
+    unix_time: papd.Series[padt.UInt32] = pa.Field()
+    merch_lat: papd.Series[padt.Float32] = pa.Field(ge=-90, le=90)
+    merch_long: papd.Series[padt.Float32] = pa.Field(ge=-180, le=180)
 
 
-Inputs = papl.DataFrame[InputsSchema]
+Inputs = papd.DataFrame[InputsSchema]
 
 
 class TargetsSchema(Schema):
-    instant: papl.Series[padt.UInt32] = pa.Field(ge=0)
-    is_fraud: papl.Series[padt.Bool] = pa.Field()
+    """Schema for the project target variable."""
+
+    instant: papd.Index[padt.UInt32] = pa.Field(ge=0)
+    is_fraud: papd.Series[padt.UInt8] = pa.Field(isin=[0, 1])
 
 
-Targets = papl.DataFrame[TargetsSchema]
+Targets = papd.DataFrame[TargetsSchema]
 
 
 class OutputsSchema(Schema):
     """Schema for the project output."""
 
-    instant: papl.Series[padt.UInt32] = pa.Field(ge=0)
-    prediction: papl.Series[padt.Bool] = pa.Field(isin=[True, False])
+    instant: papd.Index[padt.UInt32] = pa.Field(ge=0)
+    prediction: papd.Series[padt.UInt8] = pa.Field(isin=[0, 1])
 
 
-Outputs = papl.DataFrame[OutputsSchema]
+Outputs = papd.DataFrame[OutputsSchema]
