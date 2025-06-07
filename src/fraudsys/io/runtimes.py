@@ -115,8 +115,8 @@ class Mlflow(Runtime):
         log_system_metrics: bool | None = True
 
     # server uri
-    tracking_uri: str = "http://localhost:5001"
-    registry_uri: str = "http://localhost:5001"
+    tracking_uri: str = "./mlruns"
+    registry_uri: str = "./mlruns"
     # experiment
     experiment_name: str = "fraudsys"
     # registry
