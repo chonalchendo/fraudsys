@@ -28,7 +28,7 @@ dependencies = [
     "seaborn>=0.13.2",
     "setuptools>=80.7.1",
     "uvicorn>=0.34.2",
-    "xgboost>=3.0.2",
+    "xgboost>=1.4.2,<=3.0.0",
 ]
 
 [project.scripts]
