@@ -1,0 +1,22 @@
+job:
+  KIND: training
+  inputs:
+    KIND: parquet
+    path: data/training/inputs_train.parquet
+    dataframe_type: pandas
+  targets:
+    KIND: parquet
+    path: data/training/targets_train.parquet
+    dataframe_type: pandas
+  splitter:
+    KIND: time_series
+  model:
+    KIND: xgboost
+  metrics:
+    - KIND: sklearn
+  saver:
+    KIND: custom_saver
+  signer:
+    KIND: infer_signer
+  registry:
+    KIND: mlflow_register
