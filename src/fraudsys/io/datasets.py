@@ -4,13 +4,15 @@ from pathlib import Path
 
 import kaggle
 import mlflow.data.pandas_dataset as lineage
+import pandas as pd
 import polars as pl
 import pydantic as pdt
 
 # %% - LOADERS
 
-type LoadType = pl.DataFrame | tuple[pl.DataFrame, ...]
-type WriteType = pl.DataFrame
+type DataFrameType = pl.DataFrame | pd.DataFrame
+type LoadType = pl.DataFrame | pd.DataFrame | tuple[pd.DataFrame, ...]
+type WriteType = pd.DataFrame
 Lineage: T.TypeAlias = lineage.PandasDataset
 
 
@@ -61,34 +63,58 @@ class JsonLoader(Loader):
     def load(self) -> LoadType:
         if not Path(self.path).exists():
             raise FileNotFoundError(f"File not found: {self.path}")
-        return pl.read_ndjson(self.path)
+        return pd.read_json(self.path, lines=True)
 
 
 class ParquetLoader(Loader):
     KIND: T.Literal["parquet"] = "parquet"
 
+    dataframe_type: T.Literal["pandas", "polars"] = pdt.Field(default="polars")
     storage_options: dict | None = pdt.Field(default=None)
+    backend: T.Literal["pyarrow", "numpy_nullable"] = pdt.Field("pyarrow")
+    index_name: str = pdt.Field("instant")
 
     @T.override
     def load(self) -> LoadType:
         if not Path(self.path).exists():
             raise FileNotFoundError(f"File not found: {self.path}")
-        df = pl.read_parquet(self.path, storage_options=self.storage_options)
-        # rename index column
-        df = df.rename({df.columns[0]: "instant"})
-        return df
+
+        if self.dataframe_type == "pandas":
+            df = pd.read_parquet(
+                self.path,
+                storage_options=self.storage_options,
+                dtype_backend=self.backend,
+            )
+
+            if self.index_name in df.columns and df.index.name != self.index_name:
+                return df.set_index(self.index_name)
+
+            if df.index.name != self.index_name:
+                return df.rename_axis(self.index_name)
+            return df
+
+        if self.dataframe_type == "polars":
+            df = pl.read_parquet(self.path, storage_options=self.storage_options)
+
+            if len(df.columns) == 1 and df.columns[0] != self.index_name:
+                return df.with_row_index(name=self.index_name)
+
+            if self.index_name not in df.columns:
+                return df.rename({df.columns[0]: self.index_name})
+            return df
 
     @T.override
     def lineage(
         self,
         name: str,
-        data: pl.DataFrame,
+        data: DataFrameType,
         targets: str | None = None,
         predictions: str | None = None,
     ) -> Lineage:
-        pandas_data = data.to_pandas()
+        if isinstance(data, pl.DataFrame):
+            data = data.to_pandas()
         return lineage.from_pandas(
-            df=pandas_data,
+            df=data,
             name=name,
             source=self.path,
             targets=targets,
@@ -151,7 +177,7 @@ class Writer(abc.ABC, pdt.BaseModel, strict=True, frozen=False, extra="forbid"):
     path: str
 
     @abc.abstractmethod
-    def write(self, data: WriteType) -> None:
+    def write(self, data: pd.DataFrame) -> None:
         """Write the data to the path.
 
         Args:
@@ -168,10 +194,17 @@ class Writer(abc.ABC, pdt.BaseModel, strict=True, frozen=False, extra="forbid"):
 class ParquetWriter(Writer):
     KIND: T.Literal["parquet"] = "parquet"
 
+    dataframe_type: T.Literal["pandas", "polars"] = pdt.Field("polars")
+
     @T.override
-    def write(self, data: WriteType) -> None:
+    def write(self, data: DataFrameType) -> None:
         self._ensure_parent_dir(self.path)
-        data.write_parquet(self.path)
+
+        if self.dataframe_type == "pandas":
+            data.to_parquet(self.path)
+
+        if self.dataframe_type == "polars":
+            data.write_parquet(self.path)
 
 
 WriterKind = ParquetWriter
