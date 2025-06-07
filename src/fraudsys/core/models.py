@@ -3,7 +3,7 @@
 import abc
 import typing as T
 
-import polars as pl
+import pandas as pd
 import pydantic as pdt
 import xgboost
 from imblearn import pipeline
@@ -122,8 +122,8 @@ class LogisticRegressionModel(Model):
     def predict(self, inputs: schemas.Inputs) -> schemas.Outputs:
         model = self.get_internal_model()
         prediction = model.predict(inputs)
-        outputs_ = inputs.select("instant").with_columns(
-            pl.Series("prediction", prediction)
+        outputs_ = pd.DataFrame(
+            data={schemas.OutputsSchema.prediction: prediction}, index=inputs.index
         )
         outputs = schemas.OutputsSchema.check(data=outputs_)
         return outputs
@@ -160,8 +160,8 @@ class RandomForestModel(Model):
     def predict(self, inputs: schemas.Inputs) -> schemas.Outputs:
         model = self.get_internal_model()
         prediction = model.predict(inputs)
-        outputs_ = inputs.select("instant").with_columns(
-            pl.Series("prediction", prediction)
+        outputs_ = pd.DataFrame(
+            data={schemas.OutputsSchema.prediction: prediction}, index=inputs.index
         )
         outputs = schemas.OutputsSchema.check(data=outputs_)
         return outputs
@@ -222,8 +222,8 @@ class XGBoostModel(Model):
     def predict(self, inputs: schemas.Inputs) -> schemas.Outputs:
         model = self.get_internal_model()
         prediction = model.predict(inputs)
-        outputs_ = inputs.select("instant").with_columns(
-            pl.Series("prediction", prediction)
+        outputs_ = pd.DataFrame(
+            data={schemas.OutputsSchema.prediction: prediction}, index=inputs.index
         )
         outputs = schemas.OutputsSchema.check(data=outputs_)
         return outputs
