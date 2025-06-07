@@ -89,7 +89,7 @@ class TuningJob(base.ModelJob):
                 targets=targets,
                 cv=self.splitter,
             )
-            logger.debug("- Results: {}", results.shape)
+            logger.debug("- Results: {}", results)
             logger.debug("- Best Score: {}", best_score)
             logger.debug("- Best Params: {}", best_params)
         return locals()
