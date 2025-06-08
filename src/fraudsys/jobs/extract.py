@@ -16,6 +16,8 @@ class ExtractJob(base.DataJob):
 
     output_inputs_train: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
     output_targets_train: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
+    output_inputs_test: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
+    output_targets_test: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
     output_inputs_production: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
     output_targets_production: datasets.WriterKind = pdt.Field(
         ..., discriminator="KIND"
@@ -43,17 +45,27 @@ class ExtractJob(base.DataJob):
         merged_dff = self._generate_ids(merged_df)
 
         logger.info("Splitting datasets...")
-        train_df, prod_df = self._split_datasets(merged_dff)
+        offline_df, online_df = self._split_datasets(merged_dff)
+
+        logger.info("Splitting training data into train and test...")
+        train_df, test_df = self._split_training_data(offline_df)
 
         logger.info("Separating labels from training data...")
         inputs_train, targets_train = self._get_labels(train_df)
 
-        logger.info("Separating labels from production data...")
-        inputs_prod, targets_prod = self._get_labels(prod_df)
+        logger.info("Separating labels from testing data...")
+        inputs_test, targets_test = self._get_labels(test_df)
 
-        logger.info("Writing out training data...")
+        logger.info("Separating labels from production data...")
+        inputs_prod, targets_prod = self._get_labels(online_df)
+
+        logger.info("Writing out offline training data...")
         self.output_inputs_train.write(inputs_train)
         self.output_targets_train.write(targets_train)
+
+        logger.info("Writing out offline testing data...")
+        self.output_inputs_test.write(inputs_test)
+        self.output_targets_test.write(targets_test)
 
         logger.info("Writing out production data...")
         self.output_inputs_production.write(inputs_prod)
@@ -103,3 +115,15 @@ class ExtractJob(base.DataJob):
         is_fraud_df = prod_df.select(constants.TARGET_COLUMN)
         features_df = prod_df.drop(constants.TARGET_COLUMN)
         return features_df, is_fraud_df
+
+    def _split_training_data(
+        self, offline_df: pl.DataFrame
+    ) -> tuple[pl.DataFrame, pl.DataFrame]:
+        df = offline_df.sort("trans_date_trans_time")
+
+        # Compute index cutoff
+        cutoff_idx = int(0.8 * df.height)
+
+        train_df = df[:cutoff_idx]
+        test_df = df[cutoff_idx:]
+        return train_df, test_df

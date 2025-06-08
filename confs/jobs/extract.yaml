@@ -12,6 +12,12 @@ job:
   output_targets_train:  # training y data
     KIND: parquet
     path: data/training/targets_train.parquet
+  output_inputs_test:  # testing X data
+    KIND: parquet
+    path: data/training/inputs_test.parquet
+  output_targets_test:  # testing y data
+    KIND: parquet
+    path: data/training/targets_test.parquet
   output_inputs_production:  # production X data
     KIND: parquet
     path: data/prod/inputs_prod.parquet
