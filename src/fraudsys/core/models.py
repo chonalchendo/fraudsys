@@ -5,12 +5,16 @@ import typing as T
 
 import pandas as pd
 import pydantic as pdt
+import shap
 import xgboost
 from imblearn import pipeline
 from sklearn import ensemble, linear_model
 
 from fraudsys import constants
 from fraudsys.core import pipelines, schemas
+
+if T.TYPE_CHECKING:
+    from sklearn import compose
 
 # %% TYPES
 
@@ -227,6 +231,37 @@ class XGBoostModel(Model):
         )
         outputs = schemas.OutputsSchema.check(data=outputs_)
         return outputs
+
+    @T.override
+    def explain_model(self) -> schemas.FeatureImportances:
+        model = self.get_internal_model()
+        classifier: xgboost.XGBClassifier = model.named_steps["model"]
+        transformer: compose.ColumnTransformer = model.named_steps["transformer"]
+        feature = transformer.get_feature_names_out()
+        feature_importances_ = pd.DataFrame(
+            data={
+                "feature": feature,
+                "importance": classifier.feature_importances_,
+            }
+        )
+        feature_importances = schemas.FeatureImportancesSchema.check(
+            data=feature_importances_
+        )
+        return feature_importances
+
+    @T.override
+    def explain_samples(self, inputs: schemas.Inputs) -> schemas.SHAPValues:
+        model = self.get_internal_model()
+        classifier: xgboost.XGBClassifier = model.named_steps["model"]
+        transformer: compose.ColumnTransformer = model.named_steps["transformer"]
+        transformed = transformer.transform(X=inputs)
+        explainer = shap.TreeExplainer(model=classifier)
+        shap_values_ = pd.DataFrame(
+            data=explainer.shap_values(X=transformed),
+            columns=transformer.get_feature_names_out(),
+        )
+        shap_values = schemas.SHAPValuesSchema.check(data=shap_values_)
+        return shap_values
 
     @T.override
     def get_internal_model(self) -> pipeline.Pipeline:
