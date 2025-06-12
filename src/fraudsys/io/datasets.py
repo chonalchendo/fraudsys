@@ -71,8 +71,9 @@ class ParquetLoader(Loader):
 
     dataframe_type: T.Literal["pandas", "polars"] = pdt.Field(default="polars")
     storage_options: dict | None = pdt.Field(default=None)
-    backend: T.Literal["pyarrow", "numpy_nullable"] = pdt.Field("pyarrow")
-    index_name: str = pdt.Field("instant")
+    backend: T.Literal["pyarrow", "numpy_nullable"] = pdt.Field(default="pyarrow")
+    index_name: str = pdt.Field(default="instant")
+    limit: int | None = pdt.Field(default=None)
 
     @T.override
     def load(self) -> LoadType:
@@ -87,14 +88,19 @@ class ParquetLoader(Loader):
             )
 
             if self.index_name in df.columns and df.index.name != self.index_name:
-                return df.set_index(self.index_name)
+                df = df.set_index(self.index_name)
 
             if df.index.name != self.index_name:
-                return df.rename_axis(self.index_name)
+                df = df.rename_axis(self.index_name)
+
+            if self.limit is not None:
+                df = df.head(self.limit)
             return df
 
         if self.dataframe_type == "polars":
-            df = pl.read_parquet(self.path, storage_options=self.storage_options)
+            df = pl.read_parquet(
+                self.path, storage_options=self.storage_options, n_rows=self.limit
+            )
 
             if len(df.columns) == 1 and df.columns[0] != self.index_name:
                 return df.with_row_index(name=self.index_name)
@@ -201,7 +207,7 @@ class ParquetWriter(Writer):
         self._ensure_parent_dir(self.path)
 
         if self.dataframe_type == "pandas":
-            data.to_parquet(self.path)
+            data.to_parquet(self.path, index=False)
 
         if self.dataframe_type == "polars":
             data.write_parquet(self.path)
