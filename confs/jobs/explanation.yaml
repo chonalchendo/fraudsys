@@ -1,0 +1,15 @@
+job:
+  KIND: explanation
+  inputs_samples:
+    KIND: parquet
+    path: data/training/inputs_test.parquet
+    limit: 100
+    dataframe_type: pandas
+  model_explanations:
+    KIND: parquet
+    path: outputs/models_explanations.parquet
+    dataframe_type: pandas
+  samples_explanations:
+    KIND: parquet
+    path: outputs/samples_explanations.parquet
+    dataframe_type: pandas
