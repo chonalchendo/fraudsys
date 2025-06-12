@@ -1,0 +1,10 @@
+job:
+  KIND: inference
+  inputs:
+    KIND: parquet
+    dataframe_type: pandas
+    path: data/training/inputs_test.parquet
+  outputs:
+    KIND: parquet
+    dataframe_type: pandas
+    path: outputs/predictions_test.parquet
