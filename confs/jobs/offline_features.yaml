@@ -1,8 +1,14 @@
 job:
   KIND: offline_features
-  input:
+  input_raw_train:
     KIND: parquet
     path: data/training/raw_inputs_train.parquet
-  output:
+  input_raw_test:
+    KIND: parquet
+    path: data/training/raw_inputs_test.parquet
+  output_inputs_train:
     KIND: parquet
     path: data/training/inputs_train.parquet
+  output_inputs_test:
+    KIND: parquet
+    path: data/training/inputs_test.parquet
