@@ -1,6 +1,6 @@
 import argparse
-from pathlib import Path
 import typing as T
+from pathlib import Path
 
 import omegaconf as oc
 from dotenv import load_dotenv
@@ -14,6 +14,11 @@ load_dotenv()
 
 JOBS_DIR = Path("confs/jobs")
 SERVICES_DIR = Path("confs/services")
+
+
+class Commands:
+    JOB: str = "job"
+    SERVICE: str = "service"
 
 
 def get_config_options(
@@ -36,7 +41,7 @@ subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
 
 # Named job execution
-job_parser = subparsers.add_parser("job", help="Run a named job")
+job_parser = subparsers.add_parser(Commands.JOB, help="Run a named job")
 job_parser.add_argument("name", choices=get_config_options("jobs"), help="Job name")
 job_parser.add_argument(
     "-e", "--extras", nargs="*", default=[], help="Config strings for the job."
@@ -44,7 +49,7 @@ job_parser.add_argument(
 job_parser.add_argument("-c", "--config", help="Override config file path")
 
 # Named service execution
-service_parser = subparsers.add_parser("service", help="Run a named service")
+service_parser = subparsers.add_parser(Commands.SERVICE, help="Run a named service")
 service_parser.add_argument(
     "name", choices=get_config_options("services"), help="Service name"
 )
@@ -74,10 +79,10 @@ def execute(argv: list[str] | None = None) -> int:
                 print(f"  - {service}")
         return 0
 
-    if args.command == "job":
+    if args.command == Commands.JOB:
         config_file = JOBS_DIR / f"{args.name}.yaml"
         config_files = [config_file]
-    elif args.command == "service":
+    elif args.command == Commands.SERVICE:
         config_file = SERVICES_DIR / f"{args.name}.yaml"
         config_files = [config_file]
     else:
@@ -100,14 +105,14 @@ def execute(argv: list[str] | None = None) -> int:
     if not isinstance(object_, dict):
         raise RuntimeError("Expected object_ to be a dict")
 
-    if args.command == "job":
+    if args.command == Commands.JOB:
         job_setting = settings.JobSettings.model_validate(object_)
         print(job_setting)
         with job_setting.job as job:
             job.run()
             return 0
 
-    if args.command == "service":
+    if args.command == Commands.SERVICE:
         service_setting = settings.ServiceSettings.model_validate(object_)
         print(service_setting)
         service_setting.service.start()
