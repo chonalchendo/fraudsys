@@ -105,7 +105,7 @@ class CustomSaver(Saver):
     https://mlflow.org/docs/latest/python_api/mlflow.pyfunc.html
     """
 
-    KIND: T.Literal["custom_saver"] = "customer_saver"
+    KIND: T.Literal["custom_saver"] = "custom_saver"
 
     class Adapter(PythonModel):  # type: ignore[misc]
         """Adapt a custom model to the Mlflow PyFunc flavor for saving operations.
@@ -231,7 +231,7 @@ class CustomReader(Reader):
     https://mlflow.org/docs/latest/python_api/mlflow.pyfunc.html
     """
 
-    KIND: T.Literal["custom_reader"] = "customer_reader"
+    KIND: T.Literal["custom_reader"] = "custom_reader"
 
     class Adapter(Reader.Adapter):
         """Adapt a custom model for the project inference."""
@@ -285,13 +285,13 @@ class BuiltinReader(Reader):
             return schemas.Outputs(outputs, columns=columns, index=inputs.index)
 
     @T.override
-    def load(self, uri: str) -> "BuiltinReader.Adapter":
+    def read(self, uri: str) -> "BuiltinReader.Adapter":
         model = mlflow.pyfunc.load_model(model_uri=uri)
         adapter = BuiltinReader.Adapter(model=model)
         return adapter
 
 
-LoaderKind = CustomReader | BuiltinReader
+ReaderKind = CustomReader | BuiltinReader
 
 # %% REGISTERS
 
