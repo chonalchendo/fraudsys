@@ -99,7 +99,7 @@ class Mlflow(Runtime):
         autolog_silent (bool): If True, suppresses all Mlflow warnings during autologging.
     """
 
-    class RunConfig(pdt.BaseModel, strict=True, frozen=True, extra="forbid"):
+    class RunConfig(pdt.BaseModel, strict=True, frozen=False, extra="forbid"):
         """Run configuration for Mlflow tracking.
 
         Parameters:
