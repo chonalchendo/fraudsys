@@ -30,6 +30,6 @@ def create_pipeline(
         steps=[
             ("transformer", transformer),
             # ("smote", over_sampling.SMOTE(random_state=random_state)),
-            ("model", model),
+            ("classifier", model),
         ]
     )
