@@ -235,7 +235,7 @@ class XGBoostModel(Model):
     @T.override
     def explain_model(self) -> schemas.FeatureImportances:
         model = self.get_internal_model()
-        classifier: xgboost.XGBClassifier = model.named_steps["model"]
+        classifier: xgboost.XGBClassifier = model.named_steps["classifier"]
         transformer: compose.ColumnTransformer = model.named_steps["transformer"]
         feature = transformer.get_feature_names_out()
         feature_importances_ = pd.DataFrame(
@@ -252,7 +252,7 @@ class XGBoostModel(Model):
     @T.override
     def explain_samples(self, inputs: schemas.Inputs) -> schemas.SHAPValues:
         model = self.get_internal_model()
-        classifier: xgboost.XGBClassifier = model.named_steps["model"]
+        classifier: xgboost.XGBClassifier = model.named_steps["classifier"]
         transformer: compose.ColumnTransformer = model.named_steps["transformer"]
         transformed = transformer.transform(X=inputs)
         explainer = shap.TreeExplainer(model=classifier)
