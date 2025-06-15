@@ -20,6 +20,7 @@ class EvaluationJob(base.ModelJob):
     KIND: T.Literal["evaluation"] = "evaluation"
 
     # run
+    evaluation_type: T.Literal["training_evaluation", "inference_evaluation"]
     run_config: runtimes.Mlflow.RunConfig = runtimes.Mlflow.RunConfig(name="Evaluation")
     # data
     inputs: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
@@ -49,6 +50,9 @@ class EvaluationJob(base.ModelJob):
         # - mlflow
         client = self.mlflow_runtime.client()
         logger.info("With client: {}", client.tracking_uri)
+
+        setattr(self.run_config, "name", self.evaluation_type)
+
         with self.mlflow_runtime.run_context(run_config=self.run_config) as run:
             logger.info("With run context: {}", run.info)
             # data

@@ -1,0 +1,11 @@
+job:
+  KIND: evaluation
+  evaluation_type: inference_evaluation
+  inputs:
+    KIND: parquet
+    path: data/training/inputs_test.parquet
+    dataframe_type: pandas
+  targets:
+    KIND: parquet
+    path: data/training/targets_test.parquet 
+    dataframe_type: pandas
