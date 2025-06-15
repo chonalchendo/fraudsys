@@ -87,8 +87,13 @@ class ParquetLoader(Loader):
                 dtype_backend=self.backend,
             )
 
-            if self.index_name in df.columns and df.index.name != self.index_name:
-                df = df.set_index(self.index_name)
+            drop_columns = []
+            if "" in df.columns:
+                drop_columns.append("")
+            if "instant" in df.columns:
+                drop_columns.append("instant")
+            if drop_columns:
+                df = df.drop(columns=drop_columns)
 
             if df.index.name != self.index_name:
                 df = df.rename_axis(self.index_name)
