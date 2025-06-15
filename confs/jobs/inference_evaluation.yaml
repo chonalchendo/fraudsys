@@ -7,5 +7,5 @@ job:
     dataframe_type: pandas
   targets:
     KIND: parquet
-    path: data/training/targets_test.parquet 
+    path: data/training/targets_test.parquet
     dataframe_type: pandas

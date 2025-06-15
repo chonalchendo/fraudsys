@@ -1,6 +1,6 @@
 # https://mlflow.org/docs/latest/projects.html
 
-name: fraudsys 
+name: fraudsys
 python_env: python_env.yaml
 entry_points:
   main:

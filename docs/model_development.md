@@ -1,11 +1,11 @@
 # Model Development
 
-## Training Stages 
+## Training Stages
 
 1. **Experiment**
 - Iteratively select different models and assess their performance on the training data. The most promising models will be taken forward to the tuning stage.
 2. **Tuning**
-- The most promising models will them have their hyperparamters tuned using ramdonised cross validation search. 
+- The most promising models will them have their hyperparamters tuned using ramdonised cross validation search.
 3. **Training**
 - The best model from the tuning stage is then trained on the training data.
 4. **Training Evaluation**
