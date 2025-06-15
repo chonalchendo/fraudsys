@@ -9,7 +9,6 @@ import pandera.pandas as pa
 import pandera.typing as papd
 import pandera.typing.common as padt
 
-
 # %% TYPES
 
 # Generic type for a dataframe container
