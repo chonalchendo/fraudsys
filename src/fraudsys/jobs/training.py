@@ -9,51 +9,25 @@ from fraudsys.io import datasets, registries, runtimes
 from fraudsys.jobs import base
 from fraudsys.utils import signers, splitters
 
-"""
-Questions:
-- what data am I pulling into this training pipeline?
-    - cleaned data
-    - feature engineering occurs within the Model class
-- Will I use cross-validation during training so evaluate which models are best?
-    - Yes, cross-validation will be included and results logged in MlFlow to
-    access which models are best.
-- Will the data be split based on datetime and into three splits (train, test, validation)?
-    - Yes, the data will be split into train, test, and validation. The validation set
-    will be used to tune hyperparamters in the tune job.
-- Will a baseline model be selected with more advanced models being used to see how performance
-improves.
-    - Yes, a baseline classification model will be used with further models being used to see
-    how performance improves but important to find trade off between complexity/simplicity,
-    explainability, and inference speed.
--
-"""
-
 
 class TrainingJob(base.ModelJob):
     KIND: T.Literal["training"] = "training"
 
     # run
     run_config: runtimes.Mlflow.RunConfig = runtimes.Mlflow.RunConfig(name="Training")
-
     # data
     inputs: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
     targets: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
-
     # model
     model: models.ModelKind = pdt.Field(..., discriminator="KIND")
-
     # metrics
     metrics: metrics_.MetricsKind
-
     # splitter
     splitter: splitters.SplitterKind = pdt.Field(..., discriminator="KIND")
-
     # saver
     saver: registries.SaverKind = pdt.Field(..., discriminator="KIND")
-
     # signer
     signer: signers.SignerKind = pdt.Field(..., discriminator="KIND")
-
     # registry
     registry: registries.RegisterKind = pdt.Field(..., discriminator="KIND")
 
