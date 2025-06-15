@@ -1,0 +1,9 @@
+# https://mlflow.org/docs/latest/projects.html
+
+name: fraudsys 
+python_env: python_env.yaml
+entry_points:
+  main:
+    parameters:
+      conf_file: path
+    command: "PYTHONPATH=src python -m fruadsys {conf_file}"
