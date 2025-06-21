@@ -1,10 +1,10 @@
 variable "mlflow_bucket_name" {
-    type = string
-    description = "Mlflow artifact bucket."
-    default = "mlflow-artifacts"
+  type        = string
+  description = "Mlflow artifact bucket."
+  default     = "mlflow-artifacts"
 }
 
 variable "tags" {
-    type = map
-    description = "The tags to apply to the resources"
+  type        = map(any)
+  description = "The tags to apply to the resources"
 }
