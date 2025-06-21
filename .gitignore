@@ -26,3 +26,6 @@ data/
 
 # mlflow
 mlruns
+
+# postgresql
+postgres-data
