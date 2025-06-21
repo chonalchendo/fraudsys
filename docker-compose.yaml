@@ -54,6 +54,9 @@ services:
     environment:
       - KAGGLE_KEY=${KAGGLE_KEY}
       - KAGGLE_USERNAME=${KAGGLE_USERNAME}
+    volumes:
+      - ./mlruns:/mlflow/mlruns  # persist experiment data
+      - ./mlflow.db:/mlflow/mlflow.db
 
   feature-producer:
     container_name: feature-producer
@@ -86,19 +89,35 @@ services:
       - KAGGLE_KEY=${KAGGLE_KEY}
       - KAGGLE_USERNAME=${KAGGLE_USERNAME}
 
+  mlflow-db:
+    image: postgres:14
+    container_name: mlflow-db
+    environment:
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: mlflow_pass
+      POSTGRES_DB: mlflow_db
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.20.3
+    container_name: mlflow
+    build:
+      context: .
+      dockerfile: .docker/mlflow.Dockerfile
     ports:
       - 5001:5000
-    volumes:
-      - ./mlruns:/mlflow/mlruns  # persist experiment data
-      - ./mlflow.db:/mlflow/mlflow.db
+    depends_on:
+      - mlflow-db
     environment:
       - MLFLOW_TRACKING_URI=http://localhost:5001
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     command: >
       mlflow server
       --host 0.0.0.0
       --port 5000
-      --backend-store-uri file:///mlflow/mlruns
-      --default-artifact-root file:///mlflow/mlruns
+      --backend-store-uri postgresql+psycopg2://mlflow:mlflow_pass@mlflow-db:5432/mlflow_db
+      --default-artifact-root s3://fraudsys-dev-mlflow-artifacts
       --serve-artifacts
