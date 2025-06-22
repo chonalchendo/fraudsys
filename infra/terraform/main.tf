@@ -1,6 +1,6 @@
 locals {
   mlflow_bucket_name = "${var.project_name}-${var.environment}-mlflow-artifacts"
-  mlflow_user_name = "fraudsys"
+  mlflow_user_name   = "fraudsys"
 }
 
 module "s3" {
@@ -9,8 +9,8 @@ module "s3" {
 }
 
 module "iam" {
-  source = "./modules/iam"
-  mlflow_user_name = local.mlflow_user_name
+  source             = "./modules/iam"
+  mlflow_user_name   = local.mlflow_user_name
   mlflow_bucket_name = local.mlflow_bucket_name
-  mlflow_bucket_arn = module.s3.mlflow_bucket_arn
+  mlflow_bucket_arn  = module.s3.mlflow_bucket_arn
 }
