@@ -12,6 +12,17 @@ job:
     KIND: time_series
   model:
     KIND: xgboost
+    subsample: 0.8 
+    scale_pos_weight: 10 
+    reg_lambda: 50 
+    reg_alpha: 1 
+    n_estimators: 500 
+    min_child_weight: 10
+    max_depth: 7 
+    max_delta_step: 10 
+    learning_rate: 0.01 
+    gamma: 0
+    colsample_bytree: 0.9
   metrics:
     - KIND: sklearn
   saver:
