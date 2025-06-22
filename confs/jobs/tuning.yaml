@@ -3,9 +3,11 @@ job:
   inputs:
     KIND: parquet
     path: data/training/inputs_train.parquet
+    dataframe_type: pandas
   targets:
     KIND: parquet
     path: data/training/targets_train.parquet
+    dataframe_type: pandas
   model:
     KIND: xgboost
   splitter:
