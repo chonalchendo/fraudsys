@@ -48,7 +48,6 @@ class InferenceJob(base.ModelJob):
         # inputs
         logger.info("Load inputs: {}", self.inputs)
         inputs_ = self.inputs.load()  # unchecked!
-        print(inputs_.columns.tolist())
         inputs = schemas.InputsSchema.check(inputs_)
         logger.debug("- Inputs shape: {}", inputs.shape)
         # model
