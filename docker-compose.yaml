@@ -54,9 +54,8 @@ services:
     environment:
       - KAGGLE_KEY=${KAGGLE_KEY}
       - KAGGLE_USERNAME=${KAGGLE_USERNAME}
-    volumes:
-      - ./mlruns:/mlflow/mlruns  # persist experiment data
-      - ./mlflow.db:/mlflow/mlflow.db
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 
   feature-producer:
     container_name: feature-producer
