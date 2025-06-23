@@ -32,10 +32,15 @@ class ProducerService(base.Service):
         self._wait_for_api()
 
         for record in data.to_dicts():
-            response = httpx.post(self.endpoint, json=record)
-            logger.debug("POSTED: {}", record)
-            logger.debug("RESPONSE: {}", response)
-            time.sleep(1)
+            try:
+                response = httpx.post(self.endpoint, json=record)
+                response.raise_for_status()
+                logger.debug("POSTED: {}", record)
+                logger.debug("RESPONSE: {}", response)
+                time.sleep(1)
+            except httpx.HTTPStatusError as e:
+                logger.error("Network error: {}", e)
+                time.sleep(1)
 
     def _wait_for_api(self, retries: int = 30, delay: int = 2) -> None:
         logger = self.logger.logger()
