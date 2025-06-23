@@ -19,10 +19,17 @@ class APIService(base.Service):
     kafka_servers: list[str]
     input_topic: str
 
+    mlflow_tracking_uri: str
+    mlflow_registry: str
+    mlflow_model_alias: str
+
     def start(self) -> None:
         ctx = models.AppContext(
             kafka_servers=self.kafka_servers,
             input_topic=self.input_topic,
+            mlflow_tracking_uri=self.mlflow_tracking_uri,
+            mlflow_registry=self.mlflow_registry,
+            mlflow_model_alias=self.mlflow_model_alias,
         )
 
         api_app.inject_context(ctx)
