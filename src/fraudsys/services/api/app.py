@@ -52,11 +52,11 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/predict")
+@app.post("/predict", response_model=api_models.InferenceResponse)
 async def submit_transaction(
     trxn: api_models.RawTransaction,
     producer: kafka.KafkaProducerWrapper = Depends(get_kafka_producer),
-):
+) -> api_models.InferenceResponse:
     trxn_message = trxn.model_dump()
 
     # send to kafka to be consumed by other services
