@@ -21,4 +21,4 @@ docker-up-service service:
 # spint down a service
 [group('docker')]
 docker-down-service service:
-    docker compose down {{service}} 
+    docker compose down {{service}}

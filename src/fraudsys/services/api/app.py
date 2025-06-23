@@ -71,8 +71,8 @@ async def submit_transaction(
 
     model = get_model()
     output = model.predict(inputs=input)
-    pred = output['prediction'].iloc[0]
+    pred = output["prediction"].iloc[0]
 
     # send prediction to kafka topic for monitoring etc.
 
-    return {"transaction_id": trxn_message["trans_num"], "prediction": int(pred)} 
+    return {"transaction_id": trxn_message["trans_num"], "prediction": int(pred)}

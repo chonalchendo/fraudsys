@@ -5,7 +5,6 @@
 import typing as T
 
 import pydantic as pdt
-from rich import print
 
 from fraudsys.core import schemas
 from fraudsys.io import datasets, registries
