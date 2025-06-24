@@ -32,19 +32,6 @@ class MonitoringService(base.Service):
 
     logger: runtimes.Logger = runtimes.Logger()
 
-    # def __call__(self, *args, **kwds):
-    #     super().__call__(*args, **kwds)
-    #     service_info.info({"status": "running"})
-
-    #     self.logger.start()
-    #     logger = self.logger.logger()
-    #     try:
-    #         start_http_server(self.port)
-    #         logger.info(f"Prometheus metrics server started on port {self.port}")
-    #     except OSError as e:
-    #         logger.error(f"Failed to start metrics server on port {self.port}: {e}")
-    #         raise
-
     @T.override
     def start(self) -> None:
         self.logger.start()
