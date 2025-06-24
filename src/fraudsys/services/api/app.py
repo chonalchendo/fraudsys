@@ -25,13 +25,17 @@ def get_context() -> api_models.AppContext:
 @lru_cache
 def get_kafka_producer() -> kafka.KafkaProducerWrapper:
     ctx: api_models.AppContext = get_context()
-    return kafka.KafkaProducerWrapper(topic=ctx.raw_transactions_topic, servers=ctx.kafka_servers)
+    return kafka.KafkaProducerWrapper(
+        topic=ctx.raw_transactions_topic, servers=ctx.kafka_servers
+    )
 
 
 @lru_cache
 def get_predictions_producer() -> kafka.KafkaProducerWrapper:
     ctx: api_models.AppContext = get_context()
-    return kafka.KafkaProducerWrapper(topic=ctx.predictions_topic, servers=ctx.kafka_servers) 
+    return kafka.KafkaProducerWrapper(
+        topic=ctx.predictions_topic, servers=ctx.kafka_servers
+    )
 
 
 @lru_cache
@@ -67,7 +71,7 @@ def health() -> dict[str, str]:
 async def submit_transaction(
     trxn: api_models.RawTransaction,
     producer: kafka.KafkaProducerWrapper = Depends(get_kafka_producer),
-    preds_producer: kafka.KafkaProducerWrapper = Depends(get_predictions_producer)
+    preds_producer: kafka.KafkaProducerWrapper = Depends(get_predictions_producer),
 ) -> api_models.InferenceResponse:
     trxn_message = trxn.model_dump()
 
@@ -86,8 +90,10 @@ async def submit_transaction(
     pred = output["prediction"].iloc[0]
 
     # send prediction to kafka topic for monitoring etc.
-    pred_message = {"transaction_id": trxn_message["trans_num"], "prediction": int(pred)}
+    pred_message = {
+        "transaction_id": trxn_message["trans_num"],
+        "prediction": int(pred),
+    }
     preds_producer.send(message=pred_message)
 
     return pred_message
-
