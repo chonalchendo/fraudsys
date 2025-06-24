@@ -958,6 +958,10 @@ polars==1.29.0 \
     --hash=sha256:d2acb71fce1ff0ea76db5f648abd91a7a6c460fafabce9a2e8175184efa00d02 \
     --hash=sha256:f5aac4656e58b1e12f9481950981ef68b5b0e53dd4903bd72472efd2d09a74c8
     # via fraudsys (pyproject.toml)
+prometheus-client==0.22.1 \
+    --hash=sha256:190f1331e783cf21eb60bca559354e0a4d4378facecf78f5428c39b675d20d28 \
+    --hash=sha256:cca895342e308174341b2cbf99a56bef291fbc0ef7b9e5412a0f26d653ba7094
+    # via fraudsys (pyproject.toml)
 protobuf==6.31.0 \
     --hash=sha256:00a873c06efdfb854145d9ded730b09cf57d206075c38132674093370e2edabb \
     --hash=sha256:10bd62802dfa0588649740a59354090eaf54b8322f772fbdcca19bc78d27f0d6 \
