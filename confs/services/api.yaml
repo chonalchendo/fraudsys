@@ -7,7 +7,8 @@ service:
   kafka_servers:
     - localhost:9092
     - broker:29092 # localhost:9092 - local debugging, broker:29092 - Docker
-  input_topic: raw_transactions
+  raw_transactions_topic: raw-transactions
+  predictions_topic: fraud-predictions
   mlflow_tracking_uri: "http://mlflow:5000"
   mlflow_registry: fraudsys
   mlflow_model_alias: Champion
