@@ -3,6 +3,7 @@ import typing as T
 
 import uvicorn
 
+from fraudsys.io import runtimes
 from fraudsys.services import base
 from fraudsys.services.api import app as api_app
 from fraudsys.services.api import models
@@ -17,19 +18,24 @@ class APIService(base.Service):
     reload: bool
 
     kafka_servers: list[str]
-    input_topic: str
+    raw_transactions_topic: str
+    predictions_topic: str
 
     mlflow_tracking_uri: str
     mlflow_registry: str
     mlflow_model_alias: str
 
+    logger: runtimes.Logger = runtimes.Logger()
+
     def start(self) -> None:
         ctx = models.AppContext(
             kafka_servers=self.kafka_servers,
-            input_topic=self.input_topic,
+            raw_transactions_topic=self.raw_transactions_topic,
+            predictions_topic=self.predictions_topic,
             mlflow_tracking_uri=self.mlflow_tracking_uri,
             mlflow_registry=self.mlflow_registry,
             mlflow_model_alias=self.mlflow_model_alias,
+            logger=self.logger,
         )
 
         api_app.inject_context(ctx)
