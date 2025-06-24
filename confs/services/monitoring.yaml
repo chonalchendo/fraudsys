@@ -1,0 +1,9 @@
+service:
+  KIND: 'monitoring'
+  port: 8001
+  prediction_consumer:
+    topic: fraud-predictions
+    servers:
+      - localhost:9092
+      - broker:29092
+    group_id: monitoring
