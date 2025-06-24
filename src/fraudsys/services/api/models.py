@@ -1,12 +1,16 @@
 import pydantic as pdt
 
+from fraudsys.io import runtimes
+
 
 class AppContext(pdt.BaseModel):
     kafka_servers: list[str]
-    input_topic: str
+    raw_transactions_topic: str
+    predictions_topic: str
     mlflow_tracking_uri: str = "http://mlflow:5000"
     mlflow_registry: str = "fraudsys"
     mlflow_model_alias: str = "Champion"
+    logger: runtimes.Logger
 
 
 class RawTransaction(pdt.BaseModel):
@@ -35,5 +39,5 @@ class RawTransaction(pdt.BaseModel):
 
 
 class InferenceResponse(pdt.BaseModel):
-    tranaction_id: str
+    transaction_id: str
     prediction: int
