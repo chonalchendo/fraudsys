@@ -28,7 +28,7 @@ services:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
     ports:
-      - 8080:8080
+      - "8080:8080"
     depends_on:
       - zookeeper
       - broker
@@ -48,6 +48,8 @@ services:
     build:
       context: .
       dockerfile: .docker/api.Dockerfile
+    ports:
+    - "8000:8000"
     depends_on:
       - broker
       - redis
@@ -106,7 +108,7 @@ services:
       context: .
       dockerfile: .docker/mlflow.Dockerfile
     ports:
-      - 5001:5000
+      - "5001:5000"
     depends_on:
       - mlflow-db
     environment:
@@ -120,3 +122,36 @@ services:
       --backend-store-uri postgresql+psycopg2://mlflow:mlflow_pass@mlflow-db:5432/mlflow_db
       --default-artifact-root s3://fraudsys-dev-mlflow-artifacts
       --serve-artifacts
+
+  prediction-monitoring:
+    container_name: prediction-monitoring
+    restart: always
+    build:
+      context: .
+      dockerfile: .docker/monitoring.Dockerfile
+    ports:
+      - "8001:8001"
+    depends_on:
+      - feature-api
+    environment:
+      - KAGGLE_KEY=${KAGGLE_KEY}
+      - KAGGLE_USERNAME=${KAGGLE_USERNAME} 
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes: 
+      - ./confs/services/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - prediction-monitoring # needs predictions to made first
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
