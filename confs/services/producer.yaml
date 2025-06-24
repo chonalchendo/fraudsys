@@ -1,7 +1,7 @@
 service:
   KIND: producer
   health_check_endpoint: http://feature-api:8000/health
-  endpoint: http://feature-api:8000/predict  # localhost -> http://localhost:8000/transaction, Docker -> http://feature-api:8000/transaction
+  endpoint: http://feature-api:8000/predict  # localhost -> http://localhost:8000/predict, Docker -> http://feature-api:8000/predict
   input:
     KIND: parquet
     path: "data/prod/inputs_prod.parquet"  # simulate real data coming in
