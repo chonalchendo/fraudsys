@@ -25,13 +25,25 @@ def get_context() -> api_models.AppContext:
 @lru_cache
 def get_kafka_producer() -> kafka.KafkaProducerWrapper:
     ctx: api_models.AppContext = get_context()
-    return kafka.KafkaProducerWrapper(topic=ctx.input_topic, servers=ctx.kafka_servers)
+    return kafka.KafkaProducerWrapper(topic=ctx.raw_transactions_topic, servers=ctx.kafka_servers)
+
+
+@lru_cache
+def get_predictions_producer() -> kafka.KafkaProducerWrapper:
+    ctx: api_models.AppContext = get_context()
+    return kafka.KafkaProducerWrapper(topic=ctx.predictions_topic, servers=ctx.kafka_servers) 
 
 
 @lru_cache
 def get_model() -> registries.CustomReader.Adapter:
     ctx: api_models.AppContext = get_context()
-
+    logger = ctx.logger.logger()
+    logger.info(
+        "Reading model",
+        tracking_server=ctx.mlflow_tracking_uri,
+        registry=ctx.mlflow_registry,
+        alias=ctx.mlflow_model_alias,
+    )
     # Set the tracking and registry URIs
     mlflow.set_tracking_uri(ctx.mlflow_tracking_uri)
     mlflow.set_registry_uri(ctx.mlflow_tracking_uri)  # same as tracking for local
@@ -39,7 +51,6 @@ def get_model() -> registries.CustomReader.Adapter:
     model_uri = registries.uri_for_model_alias_or_version(
         name=ctx.mlflow_registry, alias_or_version=ctx.mlflow_model_alias
     )
-    print(model_uri)
     model = registries.CustomReader().read(uri=model_uri)
     return model
 
@@ -56,6 +67,7 @@ def health() -> dict[str, str]:
 async def submit_transaction(
     trxn: api_models.RawTransaction,
     producer: kafka.KafkaProducerWrapper = Depends(get_kafka_producer),
+    preds_producer: kafka.KafkaProducerWrapper = Depends(get_predictions_producer)
 ) -> api_models.InferenceResponse:
     trxn_message = trxn.model_dump()
 
@@ -74,5 +86,8 @@ async def submit_transaction(
     pred = output["prediction"].iloc[0]
 
     # send prediction to kafka topic for monitoring etc.
+    pred_message = {"transaction_id": trxn_message["trans_num"], "prediction": int(pred)}
+    preds_producer.send(message=pred_message)
 
-    return {"transaction_id": trxn_message["trans_num"], "prediction": int(pred)}
+    return pred_message
+
