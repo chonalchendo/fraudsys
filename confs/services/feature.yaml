@@ -1,13 +1,13 @@
 service:
   KIND: feature
   kafka_consumer:
-    topic: raw_transactions
+    topic: raw-transactions
     servers:
       - localhost:9092
       - broker:29092
     group_id: feature
   kafka_producer:
-    topic: processed_transactions
+    topic: processed-transactions
     servers:
       - localhost:9092
       - broker:29092
