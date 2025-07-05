@@ -1,7 +1,7 @@
 # Project user for all AWS resources
 resource "aws_iam_user" "project_user" {
   name = var.project_user_name
-  
+
   tags = {
     Project     = var.project_name
     Environment = var.environment

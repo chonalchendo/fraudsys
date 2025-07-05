@@ -45,7 +45,7 @@ This is a production-ready online fraud detection system designed to provide rea
 
 #### **Core ML Components (`core/`)**
 - **Features**: Feature definition, cleaning, and validation logic
-- **Models**: Model training, evaluation, and serving components  
+- **Models**: Model training, evaluation, and serving components
 - **Pipelines**: End-to-end ML workflow orchestration
 - **Schemas**: Data validation and type checking with Pydantic
 - **Metrics**: Model performance evaluation and monitoring metrics
@@ -83,7 +83,7 @@ This is a production-ready online fraud detection system designed to provide rea
 **Pattern**: Factory pattern using `KIND` discriminator fields
 **Structure**:
 - `confs/jobs/` - Job configurations (YAML)
-- `confs/services/` - Service configurations (YAML)  
+- `confs/services/` - Service configurations (YAML)
 - `confs/env/` - Environment-specific overrides
 
 **Features**:
@@ -100,7 +100,7 @@ This is a production-ready online fraud detection system designed to provide rea
 - **Purpose**: Downloads fraud detection dataset from Kaggle
 - **Dataset**: `kartik2112/fraud-detection` (1M+ credit card transactions)
 - **Processing**: Splits into training (70%), testing (20%), production (10%)
-- **Outputs**: 
+- **Outputs**:
   - Training: `inputs_train.parquet`, `targets_train.parquet`
   - Testing: `inputs_test.parquet`, `targets_test.parquet`
   - Production: `inputs_prod.parquet`, `targets_prod.parquet`
@@ -110,7 +110,7 @@ This is a production-ready online fraud detection system designed to provide rea
 - **Technology**: Polars for high-performance aggregations
 - **Features Computed**:
   - **Customer Stats**: Transaction counts, amounts, merchant/category diversity (1h-30d windows)
-  - **Merchant Stats**: Fraud rates, transaction patterns, customer diversity (1d-30d windows)  
+  - **Merchant Stats**: Fraud rates, transaction patterns, customer diversity (1d-30d windows)
   - **Customer Behavior**: Velocity patterns, location analysis, spending habits
 - **Time Windows**: 1h, 6h, 1d, 7d, 30d configurable windows
 - **Outputs**: S3-stored parquet files for Feast offline store
@@ -132,7 +132,7 @@ This is a production-ready online fraud detection system designed to provide rea
 #### 5. **Tuning Job** (`tuning.yaml`)
 - **Purpose**: Hyperparameter optimization for XGBoost
 - **Method**: Random search with extensive parameter grid
-- **Parameters**: 
+- **Parameters**:
   - Tree structure: `n_estimators`, `max_depth`, `min_child_weight`
   - Learning: `learning_rate`, `subsample`, `colsample_bytree`
   - Regularization: `reg_alpha`, `reg_lambda`
@@ -141,7 +141,7 @@ This is a production-ready online fraud detection system designed to provide rea
 #### 6. **Training Job** (`training.yaml`)
 - **Purpose**: Final model training with optimized hyperparameters
 - **Model**: XGBoost with fraud detection-specific configuration
-- **Features**: 
+- **Features**:
   - Time series split (80% train, 20% validation)
   - Class imbalance handling with `scale_pos_weight`
   - Early stopping with validation monitoring
@@ -218,7 +218,7 @@ This is a production-ready online fraud detection system designed to provide rea
 #### 3. **Producer Service** (`producer.yaml`)
 - **Purpose**: Simulates real-time transaction data for testing and demonstration
 - **Data Source**: Production parquet file (`inputs_prod.parquet`)
-- **Behavior**: 
+- **Behavior**:
   - Sends transactions to API endpoint at 1-second intervals
   - Includes health check waiting for API availability
   - Loops through production dataset continuously
@@ -265,7 +265,7 @@ This is a production-ready online fraud detection system designed to provide rea
 
 ### **Monitoring and Management**:
 - **Prometheus**: Metrics collection (port 9090)
-- **Grafana**: Visualization dashboard (port 3000)  
+- **Grafana**: Visualization dashboard (port 3000)
 - **Kafka-UI**: Kafka topic monitoring and management (port 8080)
 
 ### **Container Strategy**:
@@ -321,10 +321,10 @@ This is a production-ready online fraud detection system designed to provide rea
 1. **Transaction Arrival**: POST request to `/predict` endpoint
 2. **Input Validation**: Pydantic model validation with type checking
 3. **Event Publishing**: Raw transaction sent to Kafka for audit trail
-4. **Feature Processing**: 
+4. **Feature Processing**:
    - Real-time feature extraction and cleaning
    - Integration with pre-computed batch features from feature store
-5. **Model Inference**: 
+5. **Model Inference**:
    - Champion model loaded from MLflow registry
    - Prediction generated with confidence scoring
 6. **Result Publishing**: Prediction sent to monitoring topic

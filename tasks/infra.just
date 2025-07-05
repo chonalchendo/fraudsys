@@ -2,4 +2,4 @@
 [group('infra')]
 infra-feature-store: terraform-apply terraform-outputs feast-sync-config feast-apply
 
-    
+

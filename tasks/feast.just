@@ -15,6 +15,11 @@ feast-list:
     cd infra/feast && feast entities list
     cd infra/feast && feast feature-services list
 
+# Run feature engineering pipeline
+[group('feast')]
+feast-compute-features:
+    uv run fraudsys job feature_engineering
+
 # Materialise data to online store
 [group('feast')]
 feast-materialize:
