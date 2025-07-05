@@ -1,13 +1,24 @@
-variable "mlflow_bucket_name" {
+variable "project_name" {
   type        = string
-  description = "Mlflow artifact bucket."
-  default     = "mlflow-artifacts"
+  description = "The project name"
 }
 
-variable "mlflow_user_name" {
-  type = string
+variable "environment" {
+  type        = string
+  description = "The environment (dev, staging, prod)"
+}
+
+variable "project_user_name" {
+  type        = string
+  description = "Name of the project user for AWS resources"
 }
 
 variable "mlflow_bucket_arn" {
-  type = string
+  type        = string
+  description = "ARN of the MLflow bucket"
+}
+
+variable "feast_bucket_arn" {
+  type        = string
+  description = "ARN of the Feast bucket"
 }

@@ -1,34 +1,52 @@
-resource "aws_iam_user" "name" {
-  name = var.mlflow_user_name
+# Project user for all AWS resources
+resource "aws_iam_user" "project_user" {
+  name = var.project_user_name
+  
+  tags = {
+    Project     = var.project_name
+    Environment = var.environment
+  }
 }
 
-resource "aws_s3_bucket_policy" "mlflow_bucket_policy" {
-  bucket = data.aws_s3_bucket.mlflow_bucket.id
-  policy = data.aws_iam_policy_document.mlflow_bucket_policy.json
+# Access key for the project user
+resource "aws_iam_access_key" "project_user_key" {
+  user = aws_iam_user.project_user.name
 }
 
-resource "aws_iam_access_key" "mlflow_user_key" {
-  user = aws_iam_user.name.name
+# Unified IAM policy for all project S3 buckets
+resource "aws_iam_user_policy" "project_s3_policy" {
+  name = "${var.project_name}-${var.environment}-s3-access"
+  user = aws_iam_user.project_user.name
+
+  policy = data.aws_iam_policy_document.project_s3_policy.json
 }
 
-data "aws_s3_bucket" "mlflow_bucket" {
-  bucket = var.mlflow_bucket_name
-}
-
-data "aws_iam_policy_document" "mlflow_bucket_policy" {
+# Policy document for S3 access to all project buckets
+data "aws_iam_policy_document" "project_s3_policy" {
   statement {
-    principals {
-      type        = "AWS"
-      identifiers = [aws_iam_user.name.arn]
-    }
+    sid = "ListAllBuckets"
+    actions = [
+      "s3:ListAllMyBuckets",
+      "s3:GetBucketLocation"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "ProjectBucketAccess"
     actions = [
       "s3:GetObject",
       "s3:PutObject",
-      "s3:ListBucket"
+      "s3:DeleteObject",
+      "s3:ListBucket",
+      "s3:GetBucketVersioning",
+      "s3:PutBucketVersioning"
     ]
     resources = [
       var.mlflow_bucket_arn,
-      "${var.mlflow_bucket_arn}/*"
+      "${var.mlflow_bucket_arn}/*",
+      var.feast_bucket_arn,
+      "${var.feast_bucket_arn}/*"
     ]
   }
 }
