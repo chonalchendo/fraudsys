@@ -68,6 +68,9 @@ notebooks = [
 [tool.uv]
 default-groups = ["checks", "commit", "dev", "doc"]
 
+[tool.uv.workspace]
+members = ["infra/feast"]
+
 [tool.bandit]
 targets = ["src"]
 
