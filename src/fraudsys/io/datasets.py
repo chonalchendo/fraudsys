@@ -77,7 +77,8 @@ class ParquetLoader(Loader):
 
     @T.override
     def load(self) -> LoadType:
-        if not Path(self.path).exists():
+        # Skip existence check for S3 paths as Path().exists() doesn't work with S3
+        if not self.path.startswith("s3://") and not Path(self.path).exists():
             raise FileNotFoundError(f"File not found: {self.path}")
 
         if self.dataframe_type == "pandas":
@@ -206,16 +207,20 @@ class ParquetWriter(Writer):
     KIND: T.Literal["parquet"] = "parquet"
 
     dataframe_type: T.Literal["pandas", "polars"] = pdt.Field("polars")
+    storage_options: dict | None = pdt.Field(default=None)
 
     @T.override
     def write(self, data: DataFrameType) -> None:
-        self._ensure_parent_dir(self.path)
+        if "s3://" not in self.path:
+            self._ensure_parent_dir(self.path)
 
         if self.dataframe_type == "pandas":
-            data.to_parquet(self.path, index=False)
+            data.to_parquet(
+                self.path, index=False, storage_options=self.storage_options
+            )
 
         if self.dataframe_type == "polars":
-            data.write_parquet(self.path)
+            data.write_parquet(self.path, storage_options=self.storage_options)
 
 
 WriterKind = ParquetWriter
