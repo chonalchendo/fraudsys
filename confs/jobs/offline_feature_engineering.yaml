@@ -1,0 +1,34 @@
+job:
+  KIND: offline_feature_engineering
+  inputs:
+    KIND: parquet
+    path: data/training/inputs_train.parquet
+    dataframe_type: pandas
+  targets:
+    KIND: parquet
+    path: data/training/targets_train.parquet
+    dataframe_type: pandas
+  customer_stats_output:
+    KIND: parquet
+    path: data/features/customer_stats.parquet
+    dataframe_type: polars
+    storage_options:
+      aws_region: eu-west-1
+  merchant_stats_output:
+    KIND: parquet
+    path: data/features/merchant_stats.parquet
+    dataframe_type: polars
+    storage_options:
+      aws_region: eu-west-1
+  customer_behavior_output:
+    KIND: parquet
+    path: data/features/customer_behavior.parquet
+    dataframe_type: polars
+    storage_options:
+      aws_region: eu-west-1
+  windows:
+    1h: "1h"
+    6h: "6h"
+    1d: "1d"
+    7d: "7d"
+    30d: "30d"
