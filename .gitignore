@@ -29,3 +29,6 @@ mlruns
 
 # postgresql
 postgres-data
+
+# notebooks
+notebooks
