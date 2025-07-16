@@ -81,13 +81,14 @@ class ParquetLoader(Loader):
         if not self.path.startswith("s3://") and not Path(self.path).exists():
             raise FileNotFoundError(f"File not found: {self.path}")
 
-        if self.dataframe_type == "pandas":
-            df = pd.read_parquet(
-                self.path,
-                storage_options=self.storage_options,
-                dtype_backend=self.backend,
-            )
+        df = pl.read_parquet(
+            self.path, storage_options=self.storage_options, n_rows=self.limit
+        )
 
+        if self.dataframe_type == "pandas":
+            df = df.to_pandas()
+
+            # deal with instant index assignment
             drop_columns = []
             if "" in df.columns:
                 drop_columns.append("")
@@ -104,10 +105,6 @@ class ParquetLoader(Loader):
             return df
 
         if self.dataframe_type == "polars":
-            df = pl.read_parquet(
-                self.path, storage_options=self.storage_options, n_rows=self.limit
-            )
-
             if len(df.columns) == 1 and df.columns[0] != self.index_name:
                 return df.with_row_index(name=self.index_name)
 
