@@ -5,7 +5,7 @@ import uvicorn
 
 from fraudsys.io import runtimes
 from fraudsys.services import base
-from fraudsys.services.api import app as api_app
+from fraudsys.services.api import dependencies as deps
 from fraudsys.services.api import models
 
 
@@ -38,6 +38,6 @@ class APIService(base.Service):
             logger=self.logger,
         )
 
-        api_app.inject_context(ctx)
+        deps.inject_context(ctx)
 
         uvicorn.run(self.execute, host=self.host, port=self.port, reload=self.reload)
