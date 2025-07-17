@@ -15,8 +15,8 @@ wheels/
 # logging
 stderr
 
-# data
-data/
+# data (ignore root data folder but not src/fraudsys/data/)
+/data/
 
 # env file
 .env
