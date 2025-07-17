@@ -9,7 +9,7 @@ import mlflow
 import pydantic as pdt
 from mlflow.models import signature as ms
 
-from fraudsys.core import schemas
+from fraudsys.features import validation
 
 # %% TYPES
 
@@ -30,7 +30,7 @@ class Signer(abc.ABC, pdt.BaseModel, strict=True, frozen=True, extra="forbid"):
     KIND: str
 
     @abc.abstractmethod
-    def sign(self, inputs: schemas.Inputs, outputs: schemas.Outputs) -> Signature:
+    def sign(self, inputs: validation.Inputs, outputs: validation.Outputs) -> Signature:
         """Generate a model signature from its inputs/outputs.
 
         Args:
@@ -48,7 +48,7 @@ class InferSigner(Signer):
     KIND: T.Literal["infer_signer"] = "infer_signer"
 
     @T.override
-    def sign(self, inputs: schemas.Inputs, outputs: schemas.Outputs) -> Signature:
+    def sign(self, inputs: validation.Inputs, outputs: validation.Outputs) -> Signature:
         return mlflow.models.infer_signature(model_input=inputs, model_output=outputs)
 
 

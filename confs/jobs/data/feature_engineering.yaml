@@ -1,0 +1,35 @@
+job:
+  KIND: feature_engineering
+  inputs:
+    KIND: parquet
+    path: data/training/inputs_train.parquet
+    dataframe_type: pandas
+  targets:
+    KIND: parquet
+    path: data/training/targets_train.parquet
+    dataframe_type: pandas
+  customer_stats_writer:
+    KIND: parquet
+    path: s3://fraudsys-dev-feast-offline-store/customer_transaction_stats.parquet
+    dataframe_type: polars
+    storage_options:
+      aws_region: eu-west-1
+  merchant_stats_writer:
+    KIND: parquet
+    path: s3://fraudsys-dev-feast-offline-store/merchant_stats.parquet
+    dataframe_type: polars
+    storage_options:
+      aws_region: eu-west-1
+  customer_behavior_writer:
+    KIND: parquet
+    path: s3://fraudsys-dev-feast-offline-store/customer_behavior.parquet
+    dataframe_type: polars
+    storage_options:
+      aws_region: eu-west-1
+  reference_time: "2020-03-07 00:00:00"  # set to one day after training data end
+  time_windows:
+    1h: 1
+    6h: 6
+    1d: 24
+    7d: 168    # 24 * 7
+    30d: 720   # 24 * 30

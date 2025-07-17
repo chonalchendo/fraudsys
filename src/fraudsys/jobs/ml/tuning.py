@@ -7,10 +7,11 @@ import typing as T
 import mlflow
 import pydantic as pdt
 
-from fraudsys.core import metrics, models, schemas
-from fraudsys.io import datasets, runtimes
+from fraudsys import data
+from fraudsys.features import validation
+from fraudsys.infra.mlflow import client
 from fraudsys.jobs import base
-from fraudsys.utils import searchers, splitters
+from fraudsys.ml import metrics, models, searchers, splitters
 
 # %% JOBS
 
@@ -19,11 +20,11 @@ class TuningJob(base.ModelJob):
     KIND: T.Literal["tuning"] = "tuning"
 
     # run
-    run_config: runtimes.Mlflow.RunConfig = runtimes.Mlflow.RunConfig(name="Tuning")
+    run_config: client.Mlflow.RunConfig = client.Mlflow.RunConfig(name="Tuning")
 
     # data
-    inputs: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
-    targets: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
+    inputs: data.LoaderKind = pdt.Field(..., discriminator="KIND")
+    targets: data.LoaderKind = pdt.Field(..., discriminator="KIND")
 
     # model
     model: models.ModelKind = pdt.Field(..., discriminator="KIND")
@@ -54,12 +55,12 @@ class TuningJob(base.ModelJob):
             # - inputs
             logger.info("Load inputs: {}", self.inputs)
             inputs_ = self.inputs.load()  # unchecked!
-            inputs = schemas.InputsSchema.check(inputs_)
+            inputs = validation.InputsSchema.check(inputs_)
             logger.debug("- Inputs shape: {}", inputs.shape)
             # - targets
             logger.info("Load targets: {}", self.targets)
             targets_ = self.targets.load()  # unchecked!
-            targets = schemas.TargetsSchema.check(targets_)
+            targets = validation.TargetsSchema.check(targets_)
             logger.debug("- Targets shape: {}", targets.shape)
             # lineage
             # - inputs
@@ -70,7 +71,7 @@ class TuningJob(base.ModelJob):
             # - targets
             logger.info("Log lineage: targets")
             targets_lineage = self.targets.lineage(
-                data=targets, name="targets", targets=schemas.TargetsSchema.is_fraud
+                data=targets, name="targets", targets=validation.TargetsSchema.is_fraud
             )
             mlflow.log_input(dataset=targets_lineage, context=self.run_config.name)
             logger.debug("- Targets lineage: {}", targets_lineage.to_dict())

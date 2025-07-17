@@ -5,7 +5,8 @@ import httpx
 import polars as pl
 import pydantic as pdt
 
-from fraudsys.io import datasets, runtimes
+from fraudsys import data
+from fraudsys.infra import logging
 from fraudsys.services import base
 
 
@@ -15,9 +16,9 @@ class ProducerService(base.Service):
     health_check_endpoint: str
     endpoint: str
 
-    input: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
+    input: data.LoaderKind = pdt.Field(..., discriminator="KIND")
 
-    logger: runtimes.Logger = runtimes.Logger()
+    logger: logging.Logger = logging.Logger()
 
     @T.override
     def start(self) -> None:

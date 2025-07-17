@@ -6,12 +6,13 @@ import typing as T
 
 import pydantic as pdt
 
-from fraudsys.core import schemas
-from fraudsys.io import datasets, registries
+from fraudsys import data
+from fraudsys.features import validation
+from fraudsys.infra.mlflow import registries
 from fraudsys.jobs import base
 
 if T.TYPE_CHECKING:
-    from fraudsys.core import models
+    from fraudsys.ml import models
 
 # %% JOBS
 
@@ -22,10 +23,10 @@ class ExplanationsJob(base.ModelJob):
     KIND: T.Literal["explanation"] = "explanation"
 
     # Samples
-    inputs_samples: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
+    inputs_samples: data.LoaderKind = pdt.Field(..., discriminator="KIND")
     # Explanations
-    model_explanations: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
-    samples_explanations: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
+    model_explanations: data.WriterKind = pdt.Field(..., discriminator="KIND")
+    samples_explanations: data.WriterKind = pdt.Field(..., discriminator="KIND")
     # Model
     alias_or_version: str | int = "Champion"
     # Loader
@@ -41,7 +42,7 @@ class ExplanationsJob(base.ModelJob):
         # inputs
         logger.info("Load samples: {}", self.inputs_samples)
         inputs_samples = self.inputs_samples.load()  # unchecked!
-        inputs_samples = schemas.InputsSchema.check(inputs_samples)
+        inputs_samples = validation.InputsSchema.check(inputs_samples)
         logger.debug("- Inputs samples shape: {}", inputs_samples.shape)
         # model
         logger.info("With model: {}", self.mlflow_runtime.registry_name)

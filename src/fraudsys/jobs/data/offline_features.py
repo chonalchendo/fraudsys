@@ -2,18 +2,18 @@ import typing as T
 
 import pydantic as pdt
 
-from fraudsys.core import features
-from fraudsys.io import datasets
+from fraudsys import data
+from fraudsys.features.engineering import cleaning
 from fraudsys.jobs import base
 
 
 class OfflineFeaturesJob(base.DataJob):
     KIND: T.Literal["offline_features"] = "offline_features"
 
-    input_raw_train: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
-    input_raw_test: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
-    output_inputs_train: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
-    output_inputs_test: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
+    input_raw_train: data.LoaderKind = pdt.Field(..., discriminator="KIND")
+    input_raw_test: data.LoaderKind = pdt.Field(..., discriminator="KIND")
+    output_inputs_train: data.WriterKind = pdt.Field(..., discriminator="KIND")
+    output_inputs_test: data.WriterKind = pdt.Field(..., discriminator="KIND")
 
     @T.override
     def run(self) -> base.Locals:
@@ -24,8 +24,8 @@ class OfflineFeaturesJob(base.DataJob):
         raw_test = self.input_raw_test.load()
 
         logger.info("Cleaning data...")
-        cleaned_train = features.clean(raw_train)
-        cleaned_test = features.clean(raw_test)
+        cleaned_train = cleaning.clean(raw_train)
+        cleaned_test = cleaning.clean(raw_test)
 
         logger.info("Outputting cleaned data for model training...")
         self.output_inputs_train.write(cleaned_train)

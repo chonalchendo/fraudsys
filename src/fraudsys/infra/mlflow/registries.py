@@ -9,8 +9,9 @@ import mlflow
 import pydantic as pdt
 from mlflow.pyfunc import PyFuncModel, PythonModel, PythonModelContext
 
-from fraudsys.core import models, schemas
-from fraudsys.utils import signers
+from fraudsys.features import validation
+from fraudsys.infra.mlflow import signers
+from fraudsys.ml import models
 
 # %% TYPES
 
@@ -85,7 +86,7 @@ class Saver(abc.ABC, pdt.BaseModel, strict=True, frozen=True, extra="forbid"):
         self,
         model: models.Model,
         signature: signers.Signature,
-        input_example: schemas.Inputs,
+        input_example: validation.Inputs,
     ) -> Info:
         """Save a model in the model registry.
 
@@ -124,9 +125,9 @@ class CustomSaver(Saver):
         def predict(
             self,
             context: PythonModelContext,
-            model_input: schemas.Inputs,
+            model_input: validation.Inputs,
             params: dict[str, T.Any] | None = None,
-        ) -> schemas.Outputs:
+        ) -> validation.Outputs:
             """Generate predictions with a custom model for the given inputs.
 
             Args:
@@ -144,7 +145,7 @@ class CustomSaver(Saver):
         self,
         model: models.Model,
         signature: signers.Signature,
-        input_example: schemas.Inputs,
+        input_example: validation.Inputs,
     ) -> Info:
         adapter = CustomSaver.Adapter(model=model)
         return mlflow.pyfunc.log_model(
@@ -173,7 +174,7 @@ class BuiltinSaver(Saver):
         self,
         model: models.Model,
         signature: signers.Signature,
-        input_example: schemas.Inputs,
+        input_example: validation.Inputs,
     ) -> Info:
         builtin_model = model.get_internal_model()
         module = getattr(mlflow, self.flavor)
@@ -203,7 +204,7 @@ class Reader(abc.ABC, pdt.BaseModel, strict=True, frozen=True, extra="forbid"):
         """Adapt any model for the project inference."""
 
         @abc.abstractmethod
-        def predict(self, inputs: schemas.Inputs) -> schemas.Outputs:
+        def predict(self, inputs: validation.Inputs) -> validation.Outputs:
             """Generate predictions with the internal model for the given inputs.
 
             Args:
@@ -245,10 +246,10 @@ class CustomReader(Reader):
             self.model = model
 
         @T.override
-        def predict(self, inputs: schemas.Inputs) -> schemas.Outputs:
+        def predict(self, inputs: validation.Inputs) -> validation.Outputs:
             # model validation is already done in predict
             outputs = self.model.predict(data=inputs)
-            return T.cast(schemas.Outputs, outputs)
+            return T.cast(validation.Outputs, outputs)
 
     @T.override
     def read(self, uri: str) -> "CustomReader.Adapter":
@@ -279,10 +280,10 @@ class BuiltinReader(Reader):
             self.model = model
 
         @T.override
-        def predict(self, inputs: schemas.Inputs) -> schemas.Outputs:
-            columns = list(schemas.OutputsSchema.to_schema().columns)
+        def predict(self, inputs: validation.Inputs) -> validation.Outputs:
+            columns = list(validation.OutputsSchema.to_schema().columns)
             outputs = self.model.predict(data=inputs)  # unchecked data!
-            return schemas.Outputs(outputs, columns=columns, index=inputs.index)
+            return validation.Outputs(outputs, columns=columns, index=inputs.index)
 
     @T.override
     def read(self, uri: str) -> "BuiltinReader.Adapter":

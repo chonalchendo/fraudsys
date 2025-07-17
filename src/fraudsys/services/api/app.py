@@ -1,8 +1,9 @@
 import polars as pl
 from fastapi import Depends, FastAPI
 
-from fraudsys.core import features, schemas
-from fraudsys.io import kafka
+from fraudsys.features import validation
+from fraudsys.features.engineering import cleaning
+from fraudsys.infra import kafka
 from fraudsys.services.api import dependencies as deps
 from fraudsys.services.api import models as api_models
 
@@ -26,11 +27,11 @@ async def submit_transaction(
     producer.send(message=trxn_message)
 
     data = pl.DataFrame(trxn_message)
-    cleaned_input = features.clean(data=data)
+    cleaned_input = cleaning.clean(data=data)
 
     # prediction requires a pandas dataframe
     input_ = cleaned_input.to_pandas()
-    input = schemas.InputsSchema.check(input_)
+    input = validation.InputsSchema.check(input_)
 
     model = deps.get_model()
     output = model.predict(inputs=input)

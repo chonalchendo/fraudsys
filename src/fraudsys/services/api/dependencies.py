@@ -2,7 +2,8 @@ from functools import lru_cache
 
 import mlflow
 
-from fraudsys.io import kafka, registries
+from fraudsys.infra import kafka
+from fraudsys.infra.mlflow import registries
 from fraudsys.services.api import models as api_models
 
 _context: api_models.AppContext | None = None

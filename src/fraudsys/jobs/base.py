@@ -8,7 +8,8 @@ import typing as T
 
 import pydantic as pdt
 
-from fraudsys.io import runtimes
+from fraudsys.infra import logging
+from fraudsys.infra.mlflow import client
 
 # %% TYPES
 
@@ -36,7 +37,7 @@ class DataJob(Job):
     Provides context management for logger and alerts services.
     """
 
-    logger: runtimes.Logger = runtimes.Logger()
+    logger: logging.Logger = logging.Logger()
     # alerts_service: services.AlertsService = services.AlertsService()
 
     def __enter__(self) -> T.Self:
@@ -89,9 +90,9 @@ class ModelJob(Job):
         mlflow_service (services.MlflowService): manage the mlflow system.
     """
 
-    logger: runtimes.Logger = runtimes.Logger()
+    logger: logging.Logger = logging.Logger()
     # alerts_service: services.AlertsService = services.AlertsService()
-    mlflow_runtime: runtimes.Mlflow = runtimes.Mlflow()
+    mlflow_runtime: client.Mlflow = client.Mlflow()
 
     def __enter__(self) -> T.Self:
         """Enter the job context.

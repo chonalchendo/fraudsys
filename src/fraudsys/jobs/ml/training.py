@@ -3,21 +3,22 @@ import typing as T
 import mlflow
 import pydantic as pdt
 
-from fraudsys.core import metrics as metrics_
-from fraudsys.core import models, schemas
-from fraudsys.io import datasets, registries, runtimes
+from fraudsys import data
+from fraudsys.features import validation
+from fraudsys.infra.mlflow import client, registries, signers
 from fraudsys.jobs import base
-from fraudsys.utils import signers, splitters
+from fraudsys.ml import metrics as metrics_
+from fraudsys.ml import models, splitters
 
 
 class TrainingJob(base.ModelJob):
     KIND: T.Literal["training"] = "training"
 
     # run
-    run_config: runtimes.Mlflow.RunConfig = runtimes.Mlflow.RunConfig(name="Training")
+    run_config: client.Mlflow.RunConfig = client.Mlflow.RunConfig(name="Training")
     # data
-    inputs: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
-    targets: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
+    inputs: data.LoaderKind = pdt.Field(..., discriminator="KIND")
+    targets: data.LoaderKind = pdt.Field(..., discriminator="KIND")
     # model
     model: models.ModelKind = pdt.Field(..., discriminator="KIND")
     # metrics
@@ -51,12 +52,12 @@ class TrainingJob(base.ModelJob):
             # - inputs
             logger.info("Load inputs: {}", self.inputs)
             inputs_ = self.inputs.load()  # unchecked!
-            inputs = schemas.InputsSchema.check(inputs_)
+            inputs = validation.InputsSchema.check(inputs_)
             logger.debug("- Inputs shape: {}", inputs.shape)
             # - targets
             logger.info("load targets: {}", self.targets)
             targets_ = self.targets.load()  # unchecked!
-            targets = schemas.TargetsSchema.check(targets_)
+            targets = validation.TargetsSchema.check(targets_)
             logger.debug("- Targets shape: {}", targets.shape)
             # lineage
             # - inputs
@@ -67,7 +68,7 @@ class TrainingJob(base.ModelJob):
             # - targets
             logger.info("Log lineage: targets")
             targets_lineage = self.targets.lineage(
-                data=targets, name="targets", targets=schemas.TargetsSchema.is_fraud
+                data=targets, name="targets", targets=validation.TargetsSchema.is_fraud
             )
             mlflow.log_input(dataset=targets_lineage, context=self.run_config.name)
             logger.debug("- Targets lineage: {}", targets_lineage.to_dict())
@@ -78,13 +79,13 @@ class TrainingJob(base.ModelJob):
                 self.splitter.split(inputs=inputs, targets=targets)
             )
             # - inputs
-            inputs_train = T.cast(schemas.Inputs, inputs.iloc[train_index])
-            inputs_test = T.cast(schemas.Inputs, inputs.iloc[test_index])
+            inputs_train = T.cast(validation.Inputs, inputs.iloc[train_index])
+            inputs_test = T.cast(validation.Inputs, inputs.iloc[test_index])
             logger.debug("- Inputs train shape: {}", inputs_train.shape)
             logger.debug("- Inputs test shape: {}", inputs_test.shape)
             # - targets
-            targets_train = T.cast(schemas.Targets, targets.iloc[train_index])
-            targets_test = T.cast(schemas.Targets, targets.iloc[test_index])
+            targets_train = T.cast(validation.Targets, targets.iloc[train_index])
+            targets_test = T.cast(validation.Targets, targets.iloc[test_index])
             logger.debug("- Targets train shape: {}", targets_train.shape)
             logger.debug("- Targets test shape: {}", targets_test.shape)
             # model

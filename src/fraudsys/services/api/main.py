@@ -3,7 +3,7 @@ import typing as T
 
 import uvicorn
 
-from fraudsys.io import runtimes
+from fraudsys.infra import logging
 from fraudsys.services import base
 from fraudsys.services.api import dependencies as deps
 from fraudsys.services.api import models
@@ -25,7 +25,7 @@ class APIService(base.Service):
     mlflow_registry: str
     mlflow_model_alias: str
 
-    logger: runtimes.Logger = runtimes.Logger()
+    logger: logging.Logger = logging.Logger()
 
     def start(self) -> None:
         ctx = models.AppContext(

@@ -8,10 +8,11 @@ import mlflow
 import pandas as pd
 import pydantic as pdt
 
-from fraudsys.core import metrics as metrics_
-from fraudsys.core import schemas
-from fraudsys.io import datasets, registries, runtimes
+from fraudsys import data
+from fraudsys.features import validation
+from fraudsys.infra.mlflow import client, registries
 from fraudsys.jobs import base
+from fraudsys.ml import metrics as metrics_
 
 # %% JOBS
 
@@ -21,10 +22,10 @@ class EvaluationJob(base.ModelJob):
 
     # run
     evaluation_type: T.Literal["training_evaluation", "inference_evaluation"]
-    run_config: runtimes.Mlflow.RunConfig = runtimes.Mlflow.RunConfig(name="Evaluation")
+    run_config: client.Mlflow.RunConfig = client.Mlflow.RunConfig(name="Evaluation")
     # data
-    inputs: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
-    targets: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
+    inputs: data.LoaderKind = pdt.Field(..., discriminator="KIND")
+    targets: data.LoaderKind = pdt.Field(..., discriminator="KIND")
     # model
     model_type: str = pdt.Field("classifier")
     alias_or_version: str | int = pdt.Field("Champion")
@@ -59,12 +60,12 @@ class EvaluationJob(base.ModelJob):
             # - inputs
             logger.info("Load inputs: {}", self.inputs)
             inputs_ = self.inputs.load()  # unchecked!
-            inputs = schemas.InputsSchema.check(inputs_)
+            inputs = validation.InputsSchema.check(inputs_)
             logger.debug("- Inputs shape: {}", inputs.shape)
             # - targets
             logger.info("Load targets: {}", self.targets)
             targets_ = self.targets.load()  # unchecked!
-            targets = schemas.TargetsSchema.check(targets_)
+            targets = validation.TargetsSchema.check(targets_)
             logger.debug("- Targets shape: {}", targets.shape)
             # lineage
             # - inputs
@@ -75,7 +76,7 @@ class EvaluationJob(base.ModelJob):
             # - targets
             logger.info("Log lineage: targets")
             targets_lineage = self.targets.lineage(
-                data=targets, name="targets", targets=schemas.TargetsSchema.is_fraud
+                data=targets, name="targets", targets=validation.TargetsSchema.is_fraud
             )
             mlflow.log_input(dataset=targets_lineage, context=self.run_config.name)
             logger.debug("- Targets lineage: {}", targets_lineage.to_dict())
@@ -100,8 +101,8 @@ class EvaluationJob(base.ModelJob):
             dataset = mlflow.data.from_pandas(  # type: ignore[attr-defined]
                 df=dataset_,
                 name="evaluation",
-                targets=schemas.TargetsSchema.is_fraud,
-                predictions=schemas.OutputsSchema.prediction,
+                targets=validation.TargetsSchema.is_fraud,
+                predictions=validation.OutputsSchema.prediction,
             )
             logger.debug("- Dataset: {}", dataset.to_dict())
             # metrics

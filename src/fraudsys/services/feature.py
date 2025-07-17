@@ -2,8 +2,8 @@ import typing as T
 
 import polars as pl
 
-from fraudsys.core import features
-from fraudsys.io import kafka, runtimes
+from fraudsys.features.engineering import cleaning
+from fraudsys.infra import kafka, logging
 from fraudsys.services import base
 
 
@@ -13,7 +13,7 @@ class FeatureService(base.Service):
     kafka_producer: kafka.KafkaProducerWrapper
     kafka_consumer: kafka.KafkaConsumerWrapper
 
-    logger: runtimes.Logger = runtimes.Logger()
+    logger: logging.Logger = logging.Logger()
 
     @T.override
     def start(self) -> None:
@@ -29,7 +29,7 @@ class FeatureService(base.Service):
 
     def _process_message(self, message: dict) -> dict[str, T.Any]:
         data = pl.from_records([message])
-        transformed_data = features.clean(data)
+        transformed_data = cleaning.clean(data)
         dicts = transformed_data.to_dicts()
         if len(dicts) != 1:
             raise ValueError(f"Expected 1 row, got {len(dicts)}")

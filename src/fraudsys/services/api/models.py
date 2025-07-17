@@ -1,6 +1,6 @@
 import pydantic as pdt
 
-from fraudsys.io import runtimes
+from fraudsys.infra import logging
 
 
 class AppContext(pdt.BaseModel):
@@ -10,7 +10,7 @@ class AppContext(pdt.BaseModel):
     mlflow_tracking_uri: str = "http://mlflow:5000"
     mlflow_registry: str = "fraudsys"
     mlflow_model_alias: str = "Champion"
-    logger: runtimes.Logger
+    logger: logging.Logger
 
 
 class RawTransaction(pdt.BaseModel):

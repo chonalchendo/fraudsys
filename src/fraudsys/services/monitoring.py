@@ -4,7 +4,7 @@ from collections import deque
 
 from prometheus_client import Counter, Gauge, Histogram, Info, start_http_server
 
-from fraudsys.io import kafka, runtimes
+from fraudsys.infra import kafka, logging
 from fraudsys.services import base
 
 # Prometheus metrics
@@ -30,7 +30,7 @@ class MonitoringService(base.Service):
     recent_predictions: deque = deque(maxlen=1000)
     prediction_timestamps: deque = deque(maxlen=1000)
 
-    logger: runtimes.Logger = runtimes.Logger()
+    logger: logging.Logger = logging.Logger()
 
     @T.override
     def start(self) -> None:

@@ -6,8 +6,9 @@ import typing as T
 
 import pydantic as pdt
 
-from fraudsys.core import schemas
-from fraudsys.io import datasets, registries
+from fraudsys import data
+from fraudsys.features import validation
+from fraudsys.infra.mlflow import registries
 from fraudsys.jobs import base
 
 # %% JOBS
@@ -20,8 +21,8 @@ class InferenceJob(base.ModelJob):
     if the model is good enough to be used in production.
 
     Parameters:
-        inputs (datasets.ReaderKind): reader for the inputs data.
-        outputs (datasets.WriterKind): writer for the outputs data.
+        inputs (data.ReaderKind): reader for the inputs data.
+        outputs (data.WriterKind): writer for the outputs data.
         alias_or_version (str | int): alias or version for the  model.
         loader (registries.LoaderKind): registry loader for the model.
     """
@@ -29,9 +30,9 @@ class InferenceJob(base.ModelJob):
     KIND: T.Literal["inference"] = "inference"
 
     # Inputs
-    inputs: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
+    inputs: data.LoaderKind = pdt.Field(..., discriminator="KIND")
     # Outputs
-    outputs: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
+    outputs: data.WriterKind = pdt.Field(..., discriminator="KIND")
     # Model
     alias_or_version: str | int = "Champion"
     # Reader
@@ -47,7 +48,7 @@ class InferenceJob(base.ModelJob):
         # inputs
         logger.info("Load inputs: {}", self.inputs)
         inputs_ = self.inputs.load()  # unchecked!
-        inputs = schemas.InputsSchema.check(inputs_)
+        inputs = validation.InputsSchema.check(inputs_)
         logger.debug("- Inputs shape: {}", inputs.shape)
         # model
         logger.info("With model: {}", self.mlflow_runtime.registry_name)

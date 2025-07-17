@@ -4,8 +4,8 @@ from copy import deepcopy
 import polars as pl
 import pydantic as pdt
 
-from fraudsys.core import features
-from fraudsys.io import datasets
+from fraudsys import data
+from fraudsys.features.engineering import aggregations as agg
 from fraudsys.jobs import base
 
 
@@ -20,13 +20,13 @@ class OfflineFeatureEngineeringJob(base.DataJob):
     KIND: T.Literal["offline_feature_engineering"] = "offline_feature_engineering"
 
     # Input data sources
-    inputs: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
-    targets: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
+    inputs: data.LoaderKind = pdt.Field(..., discriminator="KIND")
+    targets: data.LoaderKind = pdt.Field(..., discriminator="KIND")
 
     # Output writers for different feature types
-    customer_stats_output: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
-    merchant_stats_output: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
-    customer_behavior_output: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
+    customer_stats_output: data.WriterKind = pdt.Field(..., discriminator="KIND")
+    merchant_stats_output: data.WriterKind = pdt.Field(..., discriminator="KIND")
+    customer_behavior_output: data.WriterKind = pdt.Field(..., discriminator="KIND")
 
     # Time windows to compute features for
     windows: dict[str, str] = pdt.Field(
@@ -80,7 +80,7 @@ class OfflineFeatureEngineeringJob(base.DataJob):
             None,
             "customer_stats",
             self.customer_stats_output,
-            features.compute_customer_transaction_stats,
+            agg.compute_customer_transaction_stats,
         )
         output_paths["customer_stats"] = customer_paths
 
@@ -91,7 +91,7 @@ class OfflineFeatureEngineeringJob(base.DataJob):
             targets_pl,
             "merchant_stats",
             self.merchant_stats_output,
-            features.compute_merchant_stats,
+            agg.compute_merchant_stats,
         )
         output_paths["merchant_stats"] = merchant_paths
 
@@ -102,7 +102,7 @@ class OfflineFeatureEngineeringJob(base.DataJob):
             None,
             "customer_behavior",
             self.customer_behavior_output,
-            features.compute_customer_behavior_stats,
+            agg.compute_customer_behavior_stats,
         )
         output_paths["customer_behavior"] = behavior_paths
 
@@ -147,7 +147,7 @@ class OfflineFeatureEngineeringJob(base.DataJob):
         df: pl.DataFrame,
         targets_df: pl.DataFrame | None,
         feature_type: str,
-        base_output: datasets.WriterKind,
+        base_output: data.WriterKind,
         feature_function: T.Callable,
     ) -> dict[str, str]:
         """Compute and save features for all windows for a specific feature type."""
@@ -194,11 +194,11 @@ class OfflineFeatureEngineeringJob(base.DataJob):
         return output_paths
 
     def _create_window_writer(
-        self, base_output: datasets.WriterKind, window_name: str
-    ) -> datasets.WriterKind:
+        self, base_output: data.WriterKind, window_name: str
+    ) -> data.WriterKind:
         """Create a writer for a specific feature type and window."""
         # Deep copy the output writer to avoid modifying the original
-        window_writer: datasets.WriterKind = deepcopy(base_output)
+        window_writer: data.WriterKind = deepcopy(base_output)
 
         # Modify the path to include feature type and window name
         base_path = window_writer.path

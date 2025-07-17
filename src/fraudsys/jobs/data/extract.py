@@ -4,22 +4,21 @@ from hashlib import sha256
 import polars as pl
 import pydantic as pdt
 
-from fraudsys import constants
-from fraudsys.io import datasets
+from fraudsys import constants, data
 from fraudsys.jobs import base
 
 
 class ExtractJob(base.DataJob):
     KIND: T.Literal["extract"] = "extract"
 
-    input: datasets.LoaderKind = pdt.Field(..., discriminator="KIND")
+    input: data.LoaderKind = pdt.Field(..., discriminator="KIND")
 
-    output_inputs_train: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
-    output_targets_train: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
-    output_inputs_test: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
-    output_targets_test: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
-    output_inputs_production: datasets.WriterKind = pdt.Field(..., discriminator="KIND")
-    output_targets_production: datasets.WriterKind = pdt.Field(
+    output_inputs_train: data.WriterKind = pdt.Field(..., discriminator="KIND")
+    output_targets_train: data.WriterKind = pdt.Field(..., discriminator="KIND")
+    output_inputs_test: data.WriterKind = pdt.Field(..., discriminator="KIND")
+    output_targets_test: data.WriterKind = pdt.Field(..., discriminator="KIND")
+    output_inputs_production: data.WriterKind = pdt.Field(..., discriminator="KIND")
+    output_targets_production: data.WriterKind = pdt.Field(
         ..., discriminator="KIND"
     )
 
@@ -31,21 +30,21 @@ class ExtractJob(base.DataJob):
         data = self.input.load()
 
         if isinstance(data, pl.DataFrame):
-            raise RuntimeError("Expected two datasets (train/test), got one.")
+            raise RuntimeError("Expected two data (train/test), got one.")
 
         if len(data) != 2:
-            raise RuntimeError(f"Expected two datasets. Got {len(data)}")
+            raise RuntimeError(f"Expected two data. Got {len(data)}")
 
         train, test = data
 
-        logger.info("Merging train and test datasets...")
-        merged_df = self._merge_datasets(train, test)
+        logger.info("Merging train and test data...")
+        merged_df = self._merge_data(train, test)
 
         logger.info("Generating customer IDs...")
         merged_dff = self._generate_ids(merged_df)
 
-        logger.info("Splitting datasets...")
-        offline_df, online_df = self._split_datasets(merged_dff)
+        logger.info("Splitting data...")
+        offline_df, online_df = self._split_data(merged_dff)
 
         logger.info("Splitting training data into train and test...")
         train_df, test_df = self._split_training_data(offline_df)
@@ -90,7 +89,7 @@ class ExtractJob(base.DataJob):
             .alias("customer_id")
         )
 
-    def _split_datasets(
+    def _split_data(
         self, merged_df: pl.DataFrame
     ) -> tuple[pl.DataFrame, pl.DataFrame]:
         train_df = merged_df.filter(pl.col("original_split") == "train").drop(
@@ -101,7 +100,7 @@ class ExtractJob(base.DataJob):
         )
         return train_df, test_df
 
-    def _merge_datasets(
+    def _merge_data(
         self, train_df: pl.DataFrame, test_df: pl.DataFrame
     ) -> pl.DataFrame:
         return pl.concat(
