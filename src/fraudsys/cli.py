@@ -147,7 +147,7 @@ def job(
         with job_settings.job as job:
             console.print(f"[green]✓[/green] Job started: {job.__class__.__name__}")
             job.run()
-            console.print(f"[green]✓[/green] Job completed successfully")
+            console.print("[green]✓[/green] Job completed successfully")
 
     except FileNotFoundError as e:
         console.print(f"[red]✗ Error:[/red] {e}")
@@ -207,12 +207,12 @@ def service(
             f"[green]✓[/green] Service initialized: {service_settings.service.__class__.__name__}"
         )
         service_settings.service.start()
-        console.print(f"[green]✓[/green] Service started")
+        console.print("[green]✓[/green] Service started")
 
         # Note: In production, you might want to keep the service running
         # instead of immediately stopping it
         service_settings.service.stop()
-        console.print(f"[yellow]![/yellow] Service stopped")
+        console.print("[yellow]![/yellow] Service stopped")
 
     except FileNotFoundError as e:
         console.print(f"[red]✗ Error:[/red] {e}")

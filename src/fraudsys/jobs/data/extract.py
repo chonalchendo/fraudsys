@@ -18,9 +18,7 @@ class ExtractJob(base.DataJob):
     output_inputs_test: data.WriterKind = pdt.Field(..., discriminator="KIND")
     output_targets_test: data.WriterKind = pdt.Field(..., discriminator="KIND")
     output_inputs_production: data.WriterKind = pdt.Field(..., discriminator="KIND")
-    output_targets_production: data.WriterKind = pdt.Field(
-        ..., discriminator="KIND"
-    )
+    output_targets_production: data.WriterKind = pdt.Field(..., discriminator="KIND")
 
     @T.override
     def run(self) -> base.Locals:
@@ -89,9 +87,7 @@ class ExtractJob(base.DataJob):
             .alias("customer_id")
         )
 
-    def _split_data(
-        self, merged_df: pl.DataFrame
-    ) -> tuple[pl.DataFrame, pl.DataFrame]:
+    def _split_data(self, merged_df: pl.DataFrame) -> tuple[pl.DataFrame, pl.DataFrame]:
         train_df = merged_df.filter(pl.col("original_split") == "train").drop(
             "original_split"
         )

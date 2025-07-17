@@ -88,7 +88,7 @@ class ParquetLoader(Loader):
         if self.dataframe_type == "pandas":
             df = df.to_pandas()
 
-            # deal with instant index assignment
+            # deal with instant index assignment
             drop_columns = []
             if "" in df.columns:
                 drop_columns.append("")
