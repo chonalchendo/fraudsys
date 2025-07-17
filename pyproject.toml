@@ -1,7 +1,7 @@
 [project]
 name = "fraudsys"
 version = "0.1.0"
-description = "Add your description here"
+description = "Real-time fraud detection system."
 readme = "README.md"
 authors = [
     { name = "chonalchendo", email = "110059232+chonalchendo@users.noreply.github.com" }
@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.13.0"
 dependencies = [
     "boto3>=1.38.41",
+    "cyclopts>=3.22.2",
     "fastapi[standard]>=0.115.12",
     "hatchling>=1.27.0",
     "httpx>=0.28.1",
@@ -70,9 +71,6 @@ notebooks = [
 
 [tool.uv]
 default-groups = ["checks", "commit", "dev", "doc"]
-
-[tool.uv.workspace]
-members = ["infra/feast"]
 
 [tool.bandit]
 targets = ["src"]
