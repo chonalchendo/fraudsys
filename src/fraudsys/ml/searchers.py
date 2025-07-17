@@ -9,8 +9,8 @@ import polars as pl
 import pydantic as pdt
 from sklearn import model_selection
 
-from fraudsys.core import metrics, models, schemas
-from fraudsys.utils import splitters
+from fraudsys.features import validation
+from fraudsys.ml import metrics, models, splitters
 
 # %% TYPES
 
@@ -49,8 +49,8 @@ class Searcher(abc.ABC, pdt.BaseModel, strict=True, frozen=True, extra="forbid")
         self,
         model: models.Model,
         metric: metrics.Metric,
-        inputs: schemas.Inputs,
-        targets: schemas.Targets,
+        inputs: validation.Inputs,
+        targets: validation.Targets,
         cv: CrossValidation,
     ) -> Results:
         """Search the best model for the given inputs and targets.
@@ -58,8 +58,8 @@ class Searcher(abc.ABC, pdt.BaseModel, strict=True, frozen=True, extra="forbid")
         Args:
             model (models.Model): AI/ML model to fine-tune.
             metric (metrics.Metric): main metric to optimize.
-            inputs (schemas.Inputs): model inputs for tuning.
-            targets (schemas.Targets): model targets for tuning.
+            inputs (validation.Inputs): model inputs for tuning.
+            targets (validation.Targets): model targets for tuning.
             cv (CrossValidation): choice for cross-fold validation.
 
         Returns:
@@ -75,8 +75,8 @@ class CVSearcher(Searcher):
         self,
         model: models.Model,
         metric: metrics.Metric,
-        inputs: schemas.Inputs,
-        targets: schemas.Targets,
+        inputs: validation.Inputs,
+        targets: validation.Targets,
         cv: CrossValidation,
     ) -> Results:
         scores = model_selection.cross_val_score(
@@ -107,8 +107,8 @@ class RandomCVSearcher(Searcher):
         self,
         model: models.Model,
         metric: metrics.Metric,
-        inputs: schemas.Inputs,
-        targets: schemas.Targets,
+        inputs: validation.Inputs,
+        targets: validation.Targets,
         cv: CrossValidation,
     ) -> Results:
         searcher = model_selection.RandomizedSearchCV(

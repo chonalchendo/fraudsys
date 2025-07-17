@@ -13,7 +13,8 @@ import pydantic as pdt
 from mlflow.metrics import MetricValue
 from sklearn import metrics as sklearn_metrics
 
-from fraudsys.core import models, schemas
+from fraudsys.features import validation
+from fraudsys.ml import models
 
 # %% TYPINGS
 
@@ -43,26 +44,29 @@ class Metric(abc.ABC, pdt.BaseModel, strict=True, frozen=True, extra="forbid"):
     greater_is_better: bool
 
     @abc.abstractmethod
-    def score(self, targets: schemas.Targets, outputs: schemas.Outputs) -> float:
+    def score(self, targets: validation.Targets, outputs: validation.Outputs) -> float:
         """Score the outputs against the targets.
 
         Args:
-            targets (schemas.Targets): expected values.
-            outputs (schemas.Outputs): predicted values.
+            targets (validation.Targets): expected values.
+            outputs (validation.Outputs): predicted values.
 
         Returns:
             float: single result from the metric computation.
         """
 
     def scorer(
-        self, model: models.Model, inputs: schemas.Inputs, targets: schemas.Targets
+        self,
+        model: models.Model,
+        inputs: validation.Inputs,
+        targets: validation.Targets,
     ) -> float:
         """Score model outputs against targets.
 
         Args:
             model (models.Model): model to evaluate.
-            inputs (schemas.Inputs): model inputs values.
-            targets (schemas.Targets): model expected values.
+            inputs (validation.Inputs): model inputs values.
+            targets (validation.Targets): model expected values.
 
         Returns:
             float: single result from the metric computation.
@@ -90,11 +94,12 @@ class Metric(abc.ABC, pdt.BaseModel, strict=True, frozen=True, extra="forbid"):
             Returns:
                 MlflowMetric: the mlflow metric.
             """
-            score_targets = schemas.Targets(
-                {schemas.TargetsSchema.is_fraud: targets}, index=targets.index
+            score_targets = validation.Targets(
+                {validation.TargetsSchema.is_fraud: targets}, index=targets.index
             )
-            score_outputs = schemas.Outputs(
-                {schemas.OutputsSchema.prediction: predictions}, index=predictions.index
+            score_outputs = validation.Outputs(
+                {validation.OutputsSchema.prediction: predictions},
+                index=predictions.index,
             )
             sign = 1 if self.greater_is_better else -1  # reverse the effect
             score = self.score(targets=score_targets, outputs=score_outputs)
@@ -119,11 +124,11 @@ class SklearnMetric(Metric):
     greater_is_better: bool = True
 
     @T.override
-    def score(self, targets: schemas.Targets, outputs: schemas.Outputs) -> float:
+    def score(self, targets: validation.Targets, outputs: validation.Outputs) -> float:
         metric_func = getattr(sklearn_metrics, self.name)
         sign = 1 if self.greater_is_better else -1  # normalise values to maximise
-        y_true = targets[schemas.TargetsSchema.is_fraud]
-        y_pred = outputs[schemas.OutputsSchema.prediction]
+        y_true = targets[validation.TargetsSchema.is_fraud]
+        y_pred = outputs[validation.OutputsSchema.prediction]
         score = metric_func(y_true=y_true, y_pred=y_pred) * sign
         return float(score)
 

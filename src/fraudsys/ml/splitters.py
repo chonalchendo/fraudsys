@@ -10,7 +10,7 @@ import numpy.typing as npt
 import pydantic as pdt
 from sklearn import model_selection
 
-from fraudsys.core import schemas
+from fraudsys.features import validation
 
 # %% TYPES
 
@@ -35,15 +35,15 @@ class Splitter(abc.ABC, pdt.BaseModel, strict=True, frozen=True, extra="forbid")
     @abc.abstractmethod
     def split(
         self,
-        inputs: schemas.Inputs,
-        targets: schemas.Targets,
+        inputs: validation.Inputs,
+        targets: validation.Targets,
         groups: Index | None = None,
     ) -> TrainTestSplits:
         """Split a dataframe into subsets.
 
         Args:
-            inputs (schemas.Inputs): model inputs.
-            targets (schemas.Targets): model targets.
+            inputs (validation.Inputs): model inputs.
+            targets (validation.Targets): model targets.
             groups (Index | None, optional): group labels.
 
         Returns:
@@ -53,15 +53,15 @@ class Splitter(abc.ABC, pdt.BaseModel, strict=True, frozen=True, extra="forbid")
     @abc.abstractmethod
     def get_n_splits(
         self,
-        inputs: schemas.Inputs,
-        targets: schemas.Targets,
+        inputs: validation.Inputs,
+        targets: validation.Targets,
         groups: Index | None = None,
     ) -> int:
         """Get the number of splits generated.
 
         Args:
-            inputs (schemas.Inputs): models inputs.
-            targets (schemas.Targets): model targets.
+            inputs (validation.Inputs): models inputs.
+            targets (validation.Targets): model targets.
             groups (Index | None, optional): group labels.
 
         Returns:
@@ -87,8 +87,8 @@ class TimeSeriesSplitter(Splitter):
     @T.override
     def split(
         self,
-        inputs: schemas.Inputs,
-        targets: schemas.Targets,
+        inputs: validation.Inputs,
+        targets: validation.Targets,
         groups: Index | None = None,
     ) -> TrainTestSplits:
         splitter = model_selection.TimeSeriesSplit(
@@ -99,8 +99,8 @@ class TimeSeriesSplitter(Splitter):
     @T.override
     def get_n_splits(
         self,
-        inputs: schemas.Inputs,
-        targets: schemas.Targets,
+        inputs: validation.Inputs,
+        targets: validation.Targets,
         groups: Index | None = None,
     ) -> int:
         return self.n_splits

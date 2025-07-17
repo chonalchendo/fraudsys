@@ -11,7 +11,8 @@ from imblearn import pipeline
 from sklearn import ensemble, linear_model
 
 from fraudsys import constants
-from fraudsys.core import pipelines, schemas
+from fraudsys.features import validation
+from fraudsys.ml import pipelines
 
 if T.TYPE_CHECKING:
     from sklearn import compose
@@ -70,26 +71,26 @@ class Model(abc.ABC, pdt.BaseModel, strict=True, frozen=False, extra="forbid"):
         return self
 
     @abc.abstractmethod
-    def fit(self, inputs: schemas.Inputs, targets: schemas.Targets) -> T.Self:
+    def fit(self, inputs: validation.Inputs, targets: validation.Targets) -> T.Self:
         """Fit the model on the given inputs and targets.
 
         Args:
-            inputs (schemas.Inputs): model training inputs.
-            targets (schemas.Targets): model training targets.
+            inputs (validation.Inputs): model training inputs.
+            targets (validation.Targets): model training targets.
 
         Returns:
             T.Self: instance of the model.
         """
 
     @abc.abstractmethod
-    def predict(self, inputs: schemas.Inputs) -> schemas.Outputs:
+    def predict(self, inputs: validation.Inputs) -> validation.Outputs:
         """Generate outputs with the model for the given inputs.
 
         Args:
-            inputs (schemas.Inputs): model prediction inputs.
+            inputs (validation.Inputs): model prediction inputs.
 
         Returns:
-            schemas.Outputs: model prediction outputs.
+            validation.Outputs: model prediction outputs.
         """
 
     def get_internal_model(self) -> T.Any:
@@ -109,7 +110,7 @@ class LogisticRegressionModel(Model):
 
     @T.override
     def fit(
-        self, inputs: schemas.Inputs, targets: schemas.Targets
+        self, inputs: validation.Inputs, targets: validation.Targets
     ) -> "LogisticRegressionModel":
         classifier = linear_model.LogisticRegression(random_state=self.random_state)
         # pipeline
@@ -119,17 +120,17 @@ class LogisticRegressionModel(Model):
             category_columns=self._categoricals,
             random_state=self.random_state,
         )
-        self._pipeline.fit(X=inputs, y=targets[schemas.TargetsSchema.is_fraud])
+        self._pipeline.fit(X=inputs, y=targets[validation.TargetsSchema.is_fraud])
         return self
 
     @T.override
-    def predict(self, inputs: schemas.Inputs) -> schemas.Outputs:
+    def predict(self, inputs: validation.Inputs) -> validation.Outputs:
         model = self.get_internal_model()
         prediction = model.predict(inputs)
         outputs_ = pd.DataFrame(
-            data={schemas.OutputsSchema.prediction: prediction}, index=inputs.index
+            data={validation.OutputsSchema.prediction: prediction}, index=inputs.index
         )
-        outputs = schemas.OutputsSchema.check(data=outputs_)
+        outputs = validation.OutputsSchema.check(data=outputs_)
         return outputs
 
     @T.override
@@ -147,7 +148,7 @@ class RandomForestModel(Model):
 
     @T.override
     def fit(
-        self, inputs: schemas.Inputs, targets: schemas.Targets
+        self, inputs: validation.Inputs, targets: validation.Targets
     ) -> "RandomForestModel":
         classifier = ensemble.RandomForestClassifier(random_state=self.random_state)
         # pipeline
@@ -157,17 +158,17 @@ class RandomForestModel(Model):
             category_columns=self._categoricals,
             random_state=self.random_state,
         )
-        self._pipeline.fit(X=inputs, y=targets[schemas.TargetsSchema.is_fraud])
+        self._pipeline.fit(X=inputs, y=targets[validation.TargetsSchema.is_fraud])
         return self
 
     @T.override
-    def predict(self, inputs: schemas.Inputs) -> schemas.Outputs:
+    def predict(self, inputs: validation.Inputs) -> validation.Outputs:
         model = self.get_internal_model()
         prediction = model.predict(inputs)
         outputs_ = pd.DataFrame(
-            data={schemas.OutputsSchema.prediction: prediction}, index=inputs.index
+            data={validation.OutputsSchema.prediction: prediction}, index=inputs.index
         )
-        outputs = schemas.OutputsSchema.check(data=outputs_)
+        outputs = validation.OutputsSchema.check(data=outputs_)
         return outputs
 
     @T.override
@@ -196,7 +197,9 @@ class XGBoostModel(Model):
     max_delta_step: int = 0
 
     @T.override
-    def fit(self, inputs: schemas.Inputs, targets: schemas.Targets) -> "XGBoostModel":
+    def fit(
+        self, inputs: validation.Inputs, targets: validation.Targets
+    ) -> "XGBoostModel":
         classifier = xgboost.XGBClassifier(
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,
@@ -219,21 +222,21 @@ class XGBoostModel(Model):
             category_columns=self._categoricals,
             random_state=self.random_state,
         )
-        self._pipeline.fit(X=inputs, y=targets[schemas.TargetsSchema.is_fraud])
+        self._pipeline.fit(X=inputs, y=targets[validation.TargetsSchema.is_fraud])
         return self
 
     @T.override
-    def predict(self, inputs: schemas.Inputs) -> schemas.Outputs:
+    def predict(self, inputs: validation.Inputs) -> validation.Outputs:
         model = self.get_internal_model()
         prediction = model.predict(inputs)
         outputs_ = pd.DataFrame(
-            data={schemas.OutputsSchema.prediction: prediction}, index=inputs.index
+            data={validation.OutputsSchema.prediction: prediction}, index=inputs.index
         )
-        outputs = schemas.OutputsSchema.check(data=outputs_)
+        outputs = validation.OutputsSchema.check(data=outputs_)
         return outputs
 
     @T.override
-    def explain_model(self) -> schemas.FeatureImportances:
+    def explain_model(self) -> validation.FeatureImportances:
         model = self.get_internal_model()
         classifier: xgboost.XGBClassifier = model.named_steps["classifier"]
         transformer: compose.ColumnTransformer = model.named_steps["transformer"]
@@ -244,13 +247,13 @@ class XGBoostModel(Model):
                 "importance": classifier.feature_importances_,
             }
         )
-        feature_importances = schemas.FeatureImportancesSchema.check(
+        feature_importances = validation.FeatureImportancesSchema.check(
             data=feature_importances_
         )
         return feature_importances
 
     @T.override
-    def explain_samples(self, inputs: schemas.Inputs) -> schemas.SHAPValues:
+    def explain_samples(self, inputs: validation.Inputs) -> validation.SHAPValues:
         model = self.get_internal_model()
         classifier: xgboost.XGBClassifier = model.named_steps["classifier"]
         transformer: compose.ColumnTransformer = model.named_steps["transformer"]
@@ -260,7 +263,7 @@ class XGBoostModel(Model):
             data=explainer.shap_values(X=transformed),
             columns=transformer.get_feature_names_out(),
         )
-        shap_values = schemas.SHAPValuesSchema.check(data=shap_values_)
+        shap_values = validation.SHAPValuesSchema.check(data=shap_values_)
         return shap_values
 
     @T.override

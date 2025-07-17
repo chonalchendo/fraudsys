@@ -4,7 +4,7 @@ from imblearn import pipeline
 from sklearn import compose, preprocessing
 
 if T.TYPE_CHECKING:
-    from fraudsys.core import models
+    from fraudsys.ml import models
 
 
 def create_pipeline(
