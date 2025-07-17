@@ -91,6 +91,3 @@ class FeatureService:
             )
 
         return entity_df_
-
-
-e

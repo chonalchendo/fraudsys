@@ -364,8 +364,6 @@ class FeatureEngineeringJob(base.DataJob):
         reference_time: datetime,
     ) -> pl.DataFrame:
         """Compute customer behavioral patterns."""
-        logger = self.logger.logger()
-
         # Convert to datetime and add calculated fields
         df = transactions_df.with_columns(
             [
