@@ -1,0 +1,3 @@
+job:
+  KIND: promotion
+  alias: Production
