@@ -1,11 +1,11 @@
-from fraudsys.io import datasets
-from fraudsys.io.features import definitions as defs
-
+# classes (logic) for custom feature store
+from fraudsys import data
+from fraudsys.features.store import definitions as defs
 
 customer_stats_source = defs.BatchSource(
     name="customer_stats_source",
     description="Source definition for customer stats.",
-    loader=datasets.ParquetLoader(
+    loader=data.ParquetLoader(
         path="data/features/customer_stats_7d.parquet", dataframe_type="pandas"
     ),
     timestamp_field="transaction_datetime",
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     from rich import print
 
-    loader = datasets.ParquetLoader(
+    loader = data.ParquetLoader(
         path="data/training/inputs_train.parquet", dataframe_type="pandas"
     )
     entity_df = loader.load()

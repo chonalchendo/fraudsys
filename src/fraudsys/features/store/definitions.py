@@ -1,17 +1,18 @@
+# where logic is defined - like Dagster definitions fil
 import typing as T
 from dataclasses import dataclass
 from datetime import datetime
 
 import pandas as pd
 
-from fraudsys.io import datasets
+from fraudsys import data
 
 
 @dataclass
 class BatchSource:
     name: str
     description: str
-    loader: datasets.Loader
+    loader: data.Loader
     timestamp_field: datetime
 
     def read(self, features: list[str]) -> pd.DataFrame:
@@ -54,7 +55,7 @@ class FeatureView:
             [self.get_timestamp_field]
             + self.entity.join_keys
             + [feat.name for feat in self.features]
-            + ['event_timestamp']
+            + ["event_timestamp"]
         )
 
     @property
@@ -90,3 +91,6 @@ class FeatureService:
             )
 
         return entity_df_
+
+
+e
