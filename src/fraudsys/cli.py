@@ -153,10 +153,10 @@ def job(
         console.print(f"[red]✗ Error:[/red] {e}")
         console.print("\n[dim]Available jobs:[/dim]")
         list_jobs()
-        raise cyclopts.ValidationError(str(e))
+        raise cyclopts.ValidationError(msg=str(e))
     except Exception as e:
         console.print(f"[red]✗ Error:[/red] {e}")
-        raise cyclopts.ValidationError(str(e))
+        raise cyclopts.ValidationError(msg=str(e))
 
 
 @app.command
@@ -218,7 +218,7 @@ def service(
         console.print(f"[red]✗ Error:[/red] {e}")
         console.print("\n[dim]Available services:[/dim]")
         list_services()
-        raise cyclopts.ValidationError(str(e))
+        raise cyclopts.ValidationError(msg=str(e))
     except Exception as e:
         console.print(f"[red]✗ Error:[/red] {e}")
         raise cyclopts.CycloptsError(str(e))
@@ -327,7 +327,16 @@ def execute(argv: T.Sequence[str] | None = None) -> int:
         app(argv)
         return 0
     except cyclopts.ValidationError as e:
-        console.print(f"[red]Error:[/red] {e}")
+        # Handle cyclopts ValidationError which may not have a proper __str__ method
+        try:
+            error_msg = str(e)
+        except (NotImplementedError, Exception):
+            error_msg = (
+                getattr(e, "msg", None)
+                or getattr(e, "exception_message", None)
+                or "Unknown validation error"
+            )
+        console.print(f"[red]Error:[/red] {error_msg}")
         return 1
     except KeyboardInterrupt:
         console.print("\n[yellow]Interrupted by user[/yellow]")
