@@ -13,6 +13,7 @@ dependencies = [
     "fastapi[standard]>=0.115.12",
     "hatchling>=1.27.0",
     "httpx>=0.28.1",
+    "ibis-framework[duckdb]>=10.8.0",
     "imbalanced-learn>=0.13.0",
     "kafka-python-ng>=2.2.3",
     "kaggle>=1.7.4.5",
@@ -64,7 +65,7 @@ doc = [
     "pdoc>=15.0.3",
 ]
 notebooks = [
-    "ipykernel>=6.29.5",
+    "ipykernel>=6.30.0",
 ]
 
 # TOOLS
