@@ -89,7 +89,7 @@ class FeatureView:
     aggregation_interval: timedelta
     timestamp_field: str
 
-    def create_feature_aggregations(self) -> list[ibis.Table]:
+    def create_feature_aggregations(self) -> ibis.Table:
         """
         Create aggregated features for each customer at regular intervals
         """
@@ -147,7 +147,7 @@ class FeatureView:
         return result
 
     def _generate_calcuation_expression(
-        self, table: ibis.Table, feature: Aggregate, window_condition
+        self, table: ibis.Table, feature: Aggregate, window_condition: ibis.Column
     ) -> ibis.Value:
         # Build CASE-based aggregation
         feature_col = feature.field.name
