@@ -197,4 +197,3 @@ class FeatureService:
     # hourly_features_renamed = hourly_features.mutate(
     #     transaction_datetime=hourly_features.interval_timestamp
     # )
-
