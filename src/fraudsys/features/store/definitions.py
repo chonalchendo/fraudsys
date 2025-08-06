@@ -1,93 +1,62 @@
-# where logic is defined - like Dagster definitions fil
-import typing as T
-from dataclasses import dataclass
-from datetime import datetime
-
-import pandas as pd
+from datetime import timedelta
 
 from fraudsys import data
+from fraudsys.features.store.client import (
+    Aggregate,
+    BatchSource,
+    Entity,
+    FeatureService,
+    FeatureView,
+    Field,
+)
 
+transactions_source = BatchSource(
+    name="transactions_source",
+    description="Source definition for transactions data.",
+    loader=data.ParquetLoader(
+        path="data/training/inputs_train.parquet", dataframe_type="pandas"
+    ),
+    timestamp_field="transaction_datetime",
+)
 
-@dataclass
-class BatchSource:
-    name: str
-    description: str
-    loader: data.Loader
-    timestamp_field: datetime
+customer_entity = Entity(
+    name="customer", description="entity for customers", join_keys=["customer_id"]
+)
 
-    def read(self, features: list[str]) -> pd.DataFrame:
-        """Read batch data from source within optional date range."""
-        data = self.loader.load()
-        return data[features]
+customer_stats_fv = FeatureView(
+    name="customer_stats_fv",
+    description="Feature view for customer stats.",
+    source=transactions_source,
+    entity=customer_entity,
+    aggregation_interval=timedelta(hours=1),  # compute hourly
+    timestamp_field="transaction_datetime",
+    features=[
+        Aggregate(
+            field=Field(name="amount_usd", dtype=float),
+            function="count",
+            time_window=timedelta(days=7),
+        ),
+        Aggregate(
+            field=Field(name="amount_usd", dtype=float),
+            function="count",
+            time_window=timedelta(days=1),
+        ),
+        Aggregate(
+            field=Field(name="amount_usd", dtype=float),
+            function="mean",
+            time_window=timedelta(days=1),
+        ),
+        Aggregate(
+            field=Field(name="amount_usd", dtype=float),
+            function="mean",
+            time_window=timedelta(days=7),
+        ),
+    ],
+)
 
-
-@dataclass
-class Entity:
-    name: str
-    description: str
-    join_keys: list[str]
-
-
-@dataclass
-class Feature:
-    name: str
-    dtype: type
-    description: str | None = None
-
-
-@dataclass
-class FeatureView:
-    name: str
-    description: str
-    source: BatchSource
-    entity: Entity
-    features: list[Feature]
-    online: bool
-
-    @property
-    def get_dtypes(self) -> dict[str, type]:
-        return {feat.name: feat.dtype for feat in self.features}
-
-    @property
-    def get_feature_names(self) -> list[str]:
-        """Get list of all feature names in this view."""
-        return (
-            [self.get_timestamp_field]
-            + self.entity.join_keys
-            + [feat.name for feat in self.features]
-            + ["event_timestamp"]
-        )
-
-    @property
-    def get_timestamp_field(self) -> str:
-        return self.source.timestamp_field
-
-    @property
-    def get_entity_join_keys(self) -> list[str]:
-        return self.entity.join_keys
-
-
-@dataclass
-class FeatureService:
-    name: str
-    description: str
-    feature_views: list[FeatureView]
-    tags: dict[str, T.Any]
-
-    def get_historical_features(self, entity_df: pd.DataFrame) -> pd.DataFrame:
-        """Get historical features from all views, joined on entity keys."""
-        entity_df_ = entity_df.copy()
-
-        for view in self.feature_views:
-            feats = view.get_feature_names
-            data = view.source.read(feats)
-
-            entity_df_ = pd.merge_asof(
-                left=entity_df_.sort_values(by=view.get_timestamp_field),
-                right=data.sort_values(by=view.get_timestamp_field),
-                by=view.get_entity_join_keys,
-                on=view.get_timestamp_field,
-                direction="backward",
-            )
-
-        return entity_df_
+fraud_fs = FeatureService(
+    name="fraud_feature_service_v1",
+    description="Fraud detection system feature service",
+    feature_views=[customer_stats_fv],
+    tags={"version": "v1"},
+)
