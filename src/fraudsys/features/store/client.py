@@ -142,8 +142,6 @@ class FeatureView:
             [*self.entity.join_keys, "interval_timestamp"]
         ).aggregate(**agg_expressions)
 
-        print(result.order_by(["customer_id", "interval_timestamp"]))
-
         return result
 
     def _generate_calcuation_expression(
@@ -191,9 +189,37 @@ class FeatureService:
     tags: dict[str, T.Any]
 
     def get_historical_features(self, entity_df: pd.DataFrame) -> pd.DataFrame:
-        for fv in self.feature_views:
-            fv.create_feature_aggregations()
+        # features will be iteratively joined into this dataframe.
+        result_df = entity_df.copy()
 
-    # hourly_features_renamed = hourly_features.mutate(
-    #     transaction_datetime=hourly_features.interval_timestamp
-    # )
+        for fv in self.feature_views:
+            # Get aggregations as pandas DataFrame
+            feat_aggregations = fv.create_feature_aggregations()
+            feat_df = feat_aggregations.to_pandas()
+
+            print(f"Entity df shape: {result_df.shape}")
+            print(f"Features df shape: {feat_df.shape}")
+
+            result_df = result_df.sort_values(["transaction_datetime"])
+            feat_df = feat_df.sort_values(["interval_timestamp"])
+
+            # Rename interval_timestamp to match
+            feat_df = feat_df.rename(
+                columns={"interval_timestamp": "transaction_datetime"}
+            )
+
+            # Use pandas merge_asof
+            result_df = pd.merge_asof(
+                result_df,
+                feat_df,
+                on="transaction_datetime",
+                by="customer_id",
+                direction="backward",
+            )
+
+            print(f"After merge shape: {result_df.shape}")
+
+        # fill NaN values
+        result_df = result_df.fillna(0)
+
+        return result_df
