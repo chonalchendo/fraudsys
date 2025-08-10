@@ -34,12 +34,12 @@ customer_stats_fv = FeatureView(
         Aggregate(
             field=Field(name="amount_usd", dtype=float),
             function="count",
-            time_window=timedelta(days=7),
+            time_window=timedelta(days=1),
         ),
         Aggregate(
             field=Field(name="amount_usd", dtype=float),
             function="count",
-            time_window=timedelta(days=1),
+            time_window=timedelta(days=7),
         ),
         Aggregate(
             field=Field(name="amount_usd", dtype=float),
